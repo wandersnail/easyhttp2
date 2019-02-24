@@ -1,4 +1,4 @@
-package com.snail.network
+package com.snail.network.factory
 
 import java.io.IOException
 import java.net.InetAddress

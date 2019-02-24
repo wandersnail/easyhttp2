@@ -1,6 +1,6 @@
 package com.snail.network.utils
 
-import com.snail.network.Tls12SocketFactory
+import com.snail.network.factory.Tls12SocketFactory
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.io.InputStream
