@@ -27,6 +27,9 @@
         <activity
             android:name=".SingleDownloadActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
+        <activity
+            android:name=".GeneralRequestActivity"
+            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
     </application>
 
 </manifest>

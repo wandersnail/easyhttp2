@@ -86,7 +86,7 @@ object NetworkRequester {
     }
 
     /**
-     * 普通POST请求
+     * 普通POST请求，响应数据格式为json
      * 
      * @param cls Json数据模型
      */
@@ -100,18 +100,18 @@ object NetworkRequester {
      *
      * @param url 请求的url
      */
-    fun postUtf8Json(url: String, json: String, observer: Observer<ResponseBody>) {
+    fun postJson(url: String, json: String, observer: Observer<ResponseBody>) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         subscribe(createHttpService(url).postJson(url, requestBody), observer)
     }
 
     /**
-     * POST请求，body是json
+     * POST请求，body是json，响应数据格式为json
      *
      * @param url 请求的url
      * @param cls Json数据模型
      */
-    fun <T> postUtf8Json(url: String, json: String, cls: Class<T>, observer: Observer<T>) {
+    fun <T> postJson(url: String, json: String, cls: Class<T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val observable = createHttpService(url).postJson(url, requestBody)
         subscribe(toJsonModelObservable(cls, observable), observer)
@@ -120,17 +120,17 @@ object NetworkRequester {
     /**
      * POST请求，body是字符串
      */
-    fun postUtf8Text(url: String, text: String, observer: Observer<ResponseBody>) {
+    fun postText(url: String, text: String, observer: Observer<ResponseBody>) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         subscribe(createHttpService(url).post(url, requestBody), observer)
     }
 
     /**
-     * POST请求，body是字符串
+     * POST请求，body是字符串，响应数据格式为json
      * 
      * @param cls Json数据模型
      */
-    fun <T> postUtf8Text(url: String, text: String, cls: Class<T>, observer: Observer<T>) {
+    fun <T> postText(url: String, text: String, cls: Class<T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
         subscribe(toJsonModelObservable(cls, observable), observer)
@@ -146,7 +146,7 @@ object NetworkRequester {
     }
 
     /**
-     * POST提交表单
+     * POST提交表单，响应数据格式为json
      *
      * @param map 参数集合
      * @param cls Json数据模型
@@ -164,7 +164,7 @@ object NetworkRequester {
     }
 
     /**
-     * 上传文件
+     * 上传文件，响应数据格式为json
      * 
      * @param cls Json数据模型
      */
@@ -181,7 +181,7 @@ object NetworkRequester {
     }
 
     /**
-     * 上传文件，带参数
+     * 上传文件，带参数，响应数据格式为json
      * 
      * @param cls Json数据模型
      */
