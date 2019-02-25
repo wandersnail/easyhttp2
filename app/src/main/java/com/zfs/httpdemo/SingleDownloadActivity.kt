@@ -3,7 +3,7 @@ package com.zfs.httpdemo
 import android.os.Bundle
 import android.os.Environment
 import com.snail.commons.utils.ToastUtils
-import com.snail.network.NetworkManager
+import com.snail.network.NetworkRequester
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadTask
@@ -25,7 +25,7 @@ class SingleDownloadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_download)
         btnDownload.setOnClickListener { 
-            task = NetworkManager.instance.download(info, object : DownloadListener<DownInfo> {
+            task = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
                 override fun onStateChange(info: DownInfo, t: Throwable?) {
                     t?.printStackTrace()
                     val log = when (info.state) {
