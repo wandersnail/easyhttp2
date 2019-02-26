@@ -8,7 +8,6 @@ import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_general_request.*
 import okhttp3.MediaType
-import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import java.io.File
@@ -101,9 +100,7 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, RequestBody>()
             map["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
             val file = File(Environment.getExternalStorageDirectory(), "test.jpg")
-            val requestBody = RequestBody.create(MediaType.parse("image/jpg"), file)
-            val part = MultipartBody.Part.createFormData("file", file.name, requestBody)
-            NetworkRequester.upload("http://192.168.137.1:8080/testupload", map, part, StringRespConverter(), object : Observer<String> {
+            NetworkRequester.upload("http://192.168.137.1:8080/testupload", map, MediaType.parse("image/jpg"), file, StringRespConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
