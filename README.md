@@ -1,6 +1,6 @@
 ## 代码托管
 [![](https://jitpack.io/v/wandersnail/network-requester.svg)](https://jitpack.io/#wandersnail/network-requester)
-[![Download](https://api.bintray.com/packages/wandersnail/android/httprequester/images/download.svg) ](https://bintray.com/wandersnail/android/network-requester/_latestVersion)
+[![Download](https://api.bintray.com/packages/wandersnail/android/network-requester/images/download.svg) ](https://bintray.com/wandersnail/android/network-requester/_latestVersion)
 
 ## 使用
 
