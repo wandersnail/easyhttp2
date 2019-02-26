@@ -1,6 +1,10 @@
 package com.zfs.httpdemo
 
 import android.app.Application
+import android.os.Environment
+import com.snail.commons.AppHolder
+import com.snail.commons.entity.CrashHandler
+import java.io.File
 
 /**
  * 描述:
@@ -10,5 +14,7 @@ import android.app.Application
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
+        AppHolder.init(this)
+        CrashHandler.instance.init(this, File(Environment.getExternalStorageDirectory(), "network-requester/crash.txt"), null)
     }
 }

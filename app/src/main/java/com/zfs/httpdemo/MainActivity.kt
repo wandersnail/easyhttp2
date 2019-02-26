@@ -19,8 +19,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val data = arrayListOf("单个下载", "多个同时下载")
-        val clsArr = arrayListOf(SingleDownloadActivity::class.java, MultiDownloadActivity::class.java)
+        val data = arrayListOf("单个下载", "多个同时下载", "普通请求")
+        val clsArr = arrayListOf(SingleDownloadActivity::class.java, MultiDownloadActivity::class.java, GeneralRequestActivity::class.java)
         lv.adapter = object : BaseListAdapter<String>(this, data) {
             override fun getHolder(position: Int): BaseHolder<String> {
                 return object : BaseHolder<String>() {

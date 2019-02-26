@@ -18,7 +18,7 @@ internal interface HttpService {
 
     @POST
     @FormUrlEncoded
-    fun postForm(@Url url: String, @FieldMap map: Map<String, Any>): Observable<ResponseBody>
+    fun postForm(@Url url: String, @FieldMap map: Map<String, @JvmSuppressWildcards Any>): Observable<ResponseBody>
 
     @POST
     @Multipart
@@ -26,7 +26,7 @@ internal interface HttpService {
 
     @POST
     @Multipart
-    fun upload(@Url url: String, @PartMap args: Map<String, RequestBody>, @Part file: MultipartBody.Part): Observable<ResponseBody>
+    fun upload(@Url url: String, @PartMap args: Map<String, @JvmSuppressWildcards RequestBody>, @Part file: MultipartBody.Part): Observable<ResponseBody>
 
     @POST
     @Headers("Content-Type:application/json;charset=utf-8", "Accept:application/json;")
