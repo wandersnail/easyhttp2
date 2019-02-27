@@ -286,6 +286,13 @@ object NetworkRequester {
     private fun createFilePart(mediaType: MediaType?, file: File): MultipartBody.Part {
         return MultipartBody.Part.createFormData("file", file.name, RequestBody.create(mediaType, file))
     }
+
+    /**
+     * 上传文件
+     */
+    fun upload(url: String, file: File, observer: Observer<ResponseBody>) {
+        subscribe(createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file)), observer)
+    }
     
     /**
      * 上传文件
@@ -305,6 +312,16 @@ object NetworkRequester {
     }
 
     /**
+     * 上传文件，响应数据格式为json
+     *
+     * @param cls Json数据模型
+     */
+    fun <T> upload(url: String, file: File, cls: Class<T>, observer: Observer<T>) {
+        val observable = createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file))
+        subscribe(toJsonBeanObservable(cls, observable), observer)
+    }
+
+    /**
      * 上传文件
      *
      * @param converter 响应体转换器
@@ -316,10 +333,28 @@ object NetworkRequester {
     }
 
     /**
+     * 上传文件
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    fun <T> upload(url: String, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+        val observable = createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file))
+        subscribe(convertObservable(observable, converter), observer)
+    }
+
+    /**
      * 上传文件，带参数
      */
     fun upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, observer: Observer<ResponseBody>) {
         subscribe(createHttpService(url).upload(url, args, createFilePart(mediaType, file)), observer)
+    }
+
+    /**
+     * 上传文件，带参数
+     */
+    fun upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, observer: Observer<ResponseBody>) {
+        subscribe(createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file)), observer)
     }
 
     /**
@@ -333,6 +368,16 @@ object NetworkRequester {
     }
 
     /**
+     * 上传文件，带参数，响应数据格式为json
+     *
+     * @param cls Json数据模型
+     */
+    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, cls: Class<T>, observer: Observer<T>) {
+        val observable = createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file))
+        subscribe(toJsonBeanObservable(cls, observable), observer)
+    }
+
+    /**
      * 上传文件，带参数
      *
      * @param converter 响应体转换器
@@ -340,6 +385,17 @@ object NetworkRequester {
      */
     fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
         val observable = createHttpService(url).upload(url, args, createFilePart(mediaType, file))
+        subscribe(convertObservable(observable, converter), observer)
+    }
+
+    /**
+     * 上传文件，带参数
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+        val observable = createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file))
         subscribe(convertObservable(observable, converter), observer)
     }
 }
