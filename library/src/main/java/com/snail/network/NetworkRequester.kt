@@ -7,6 +7,7 @@ import com.snail.network.download.DownloadTask
 import com.snail.network.download.MultiDownloadListener
 import com.snail.network.general.HttpService
 import com.snail.network.general.ResponseBodyConverter
+import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
 import io.reactivex.Observable
@@ -15,8 +16,10 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Retrofit
 import retrofit2.http.PartMap
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -26,7 +29,69 @@ import java.io.File
  * author: zengfansheng
  */
 object NetworkRequester {
+    /**
+     * @param activeTime 上次使用时间
+     */
+    private data class RetrofitHolder(val retrofit: Retrofit, var activeTime: Long)
+    
+    /**
+     * 缓存Retrofit
+     */
+    private val retrofitCache = ConcurrentHashMap<String, RetrofitHolder>()
+    
+    /**
+     * 自定义的Retrofit
+     */
+    private val customRetrofitBuilderMap = ConcurrentHashMap<String, RetrofitBuilder>()
+    private var lastCheckTime = System.currentTimeMillis()
 
+    /**
+     * 设置自定义的Retrofit，如果不设置，请求使用默认的
+     * 
+     * @param baseUrl 每一个baseUrl对应一个Retrofit
+     */
+    fun setRetrofitBuilder(baseUrl: String, builder: RetrofitBuilder) {
+        val url = HttpUtils.getBaseUrl(baseUrl)
+        customRetrofitBuilderMap[url] = builder
+        //替换缓存里已有的
+        if (retrofitCache[url] != null) {
+            retrofitCache[url] = RetrofitHolder(builder.build(), System.currentTimeMillis())
+        }
+    }
+    
+    //清理不活动的
+    private fun cleanExpired() {
+        //30s清理一次
+        if (System.currentTimeMillis() - lastCheckTime >= 30000) {
+            val iterator = retrofitCache.iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                //1分钟不活动则清理掉
+                if (System.currentTimeMillis() - entry.value.activeTime >= 60000) {
+                    iterator.remove()
+                }
+            }
+        }        
+    }
+    
+    fun getRetrofit(baseUrl: String): Retrofit {
+        val url = HttpUtils.getBaseUrl(baseUrl)
+        var holder = retrofitCache[url]
+        //如果缓存里没有，通过设置的RetrofitBuilder创建，如果没有设置，使用默认
+        if (holder == null) {
+            val builder = customRetrofitBuilderMap[url]
+            holder = if (builder != null) {
+                RetrofitHolder(builder.build(), System.currentTimeMillis())
+            } else {
+                RetrofitHolder(RetrofitBuilder.getDefaultRetrofit(url), System.currentTimeMillis())
+            }
+        } else {
+            holder.activeTime = System.currentTimeMillis()
+        }
+        cleanExpired()
+        return holder.retrofit
+    }
+    
     /**
      * 单个下载
      *
@@ -59,7 +124,7 @@ object NetworkRequester {
     }
     
     private fun createHttpService(url: String): HttpService {
-        return RetrofitBuilder.getDefaultRetrofit(url).create(HttpService::class.java)
+        return getRetrofit(url).create(HttpService::class.java)
     }
         
     private fun <T> subscribe(observable: Observable<T>, observer: Observer<T>) {

@@ -4,6 +4,7 @@ import com.snail.network.exception.RetryWhenException
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Function
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -123,12 +124,8 @@ class DownloadTask<T : DownloadInfo> {
      * 暂停所有下载
      */
     fun pause() {
-        val iterator = taskMap.iterator()
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            if (entry.key.state == DownloadInfo.State.DOWNLOADING || entry.key.state == DownloadInfo.State.START) {
-                entry.value.dispose(false)
-            }
+        taskMap.values.forEach { 
+            it.dispose(false)
         }
     }
 
@@ -136,18 +133,18 @@ class DownloadTask<T : DownloadInfo> {
      * 暂停单个下载
      */
     fun pause(info: T) {
-        if (info.state == DownloadInfo.State.DOWNLOADING || info.state == DownloadInfo.State.START) {
-            taskMap[info]?.dispose(false)
-        }
+        taskMap[info]?.dispose(false)
     }
 
     /**
      * 恢复所有下载
      */
     fun resume() {
-        taskMap.keys.forEach { 
-            if (it.state == DownloadInfo.State.PAUSE) {
-                download(it)
+        AndroidSchedulers.mainThread().scheduleDirect {
+            taskMap.keys.forEach {
+                if (it.state == DownloadInfo.State.PAUSE) {
+                    download(it)
+                }
             }
         }
     }
@@ -156,8 +153,10 @@ class DownloadTask<T : DownloadInfo> {
      * 恢复单个下载
      */
     fun resume(info: T) {
-        if (info.state == DownloadInfo.State.PAUSE) {
-            download(info)
+        AndroidSchedulers.mainThread().scheduleDirect {
+            if (info.state == DownloadInfo.State.PAUSE) {
+                download(info)
+            }
         }
     }
 
