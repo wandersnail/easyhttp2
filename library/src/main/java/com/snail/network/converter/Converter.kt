@@ -1,15 +1,17 @@
-package com.snail.network.general
+package com.snail.network.converter
 
 import com.snail.network.exception.ConvertException
-import okhttp3.ResponseBody
 
 /**
  *
  *
  * date: 2019/2/26 12:26
  * author: zengfansheng
+ * 
+ * @property S 待转源
+ * @property T 转换目录
  */
-interface ResponseBodyConverter<T> {
+interface Converter<S, T> {
     @Throws(ConvertException::class)
-    fun convert(value: ResponseBody): T
+    fun convert(value: S): T
 }

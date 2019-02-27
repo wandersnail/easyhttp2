@@ -1,12 +1,11 @@
 package com.snail.network
 
 import com.google.gson.Gson
+import com.snail.network.converter.Converter
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadTask
 import com.snail.network.download.MultiDownloadListener
-import com.snail.network.general.HttpService
-import com.snail.network.general.ResponseBodyConverter
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
@@ -34,19 +33,15 @@ object NetworkRequester {
      */
     private data class RetrofitHolder(val retrofit: Retrofit, var activeTime: Long)
     
-    /**
-     * 缓存Retrofit
-     */
+    //缓存Retrofit
     private val retrofitCache = ConcurrentHashMap<String, RetrofitHolder>()
     
-    /**
-     * 自定义的Retrofit
-     */
+    //自定义的Retrofit
     private val customRetrofitBuilderMap = ConcurrentHashMap<String, RetrofitBuilder>()
     private var lastCheckTime = System.currentTimeMillis()
 
     /**
-     * 设置自定义的Retrofit，如果不设置，请求使用默认的
+     * 设置自定义的Retrofit，如果不设置，请求使用默认的。对下载无效
      * 
      * @param baseUrl 每一个baseUrl对应一个Retrofit
      */
@@ -119,7 +114,7 @@ object NetworkRequester {
         }
     }
     
-    private fun <T> convertObservable(observable: Observable<ResponseBody>, converter: ResponseBodyConverter<T>): Observable<T> {
+    private fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {
         return observable.map { converter.convert(it) }
     }
     
@@ -154,7 +149,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> get(url: String, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> get(url: String, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).get(url)
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -182,7 +177,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> post(url: String, body: RequestBody, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> post(url: String, body: RequestBody, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).post(url, body)
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -215,7 +210,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> postJson(url: String, json: String, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> postJson(url: String, json: String, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val observable = createHttpService(url).postJson(url, requestBody)
         subscribe(convertObservable(observable, converter), observer)
@@ -246,7 +241,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> postText(url: String, text: String, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> postText(url: String, text: String, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
         subscribe(convertObservable(observable, converter), observer)
@@ -278,7 +273,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> postForm(url: String, map: Map<String, Any>, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).postForm(url, map)
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -327,7 +322,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> upload(url: String, mediaType: MediaType?, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> upload(url: String, mediaType: MediaType?, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).upload(url, createFilePart(mediaType, file))
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -338,7 +333,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> upload(url: String, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> upload(url: String, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file))
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -383,7 +378,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).upload(url, args, createFilePart(mediaType, file))
         subscribe(convertObservable(observable, converter), observer)
     }
@@ -394,7 +389,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, converter: ResponseBodyConverter<T>, observer: Observer<T>) {
+    fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>) {
         val observable = createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file))
         subscribe(convertObservable(observable, converter), observer)
     }

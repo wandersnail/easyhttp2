@@ -1,4 +1,4 @@
-package com.snail.network.general
+package com.snail.network
 
 import io.reactivex.Observable
 import okhttp3.MultipartBody

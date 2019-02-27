@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import com.snail.network.NetworkRequester
+import com.snail.network.converter.StringResponseBodyConverter
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_general_request.*
@@ -42,7 +43,7 @@ class GeneralRequestActivity : BaseActivity() {
             })
         }
         btnPostText.setOnClickListener {
-            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringRespConverter(), object : Observer<String> {
+            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseBodyConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
@@ -59,7 +60,7 @@ class GeneralRequestActivity : BaseActivity() {
             })          
         }
         btnPostJson.setOnClickListener {
-            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringRespConverter(), object : Observer<String> {
+            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseBodyConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
@@ -100,7 +101,7 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, RequestBody>()
             map["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
             val file = File(Environment.getExternalStorageDirectory(), "test.jpg")
-            NetworkRequester.upload("http://192.168.137.1:8080/testupload", map, MediaType.parse("image/jpg"), file, StringRespConverter(), object : Observer<String> {
+            NetworkRequester.upload("http://192.168.137.1:8080/testupload", map, MediaType.parse("image/jpg"), file, StringResponseBodyConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
