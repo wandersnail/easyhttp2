@@ -13,7 +13,7 @@ import retrofit2.http.Url
  * date: 2019/2/23 18:05
  * author: zengfansheng
  */
-interface DownloadService {
+internal interface DownloadService {
     @Streaming
     @GET
     fun download(@Header("RANGE") offset: String, @Url url: String): Observable<ResponseBody>

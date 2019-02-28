@@ -1,5 +1,6 @@
 package com.snail.network.download
 
+import com.snail.network.callback.ProgressListener
 import okhttp3.MediaType
 import okhttp3.ResponseBody
 import okio.*

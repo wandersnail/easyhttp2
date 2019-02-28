@@ -1,5 +1,6 @@
 package com.snail.network.download
 
+import com.snail.network.TaskInfo
 import com.snail.network.exception.RetryWhenException
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
@@ -23,8 +24,8 @@ import java.util.concurrent.TimeUnit
  * date: 2019/2/23 18:13
  * author: zengfansheng
  */
-class DownloadTask<T : DownloadInfo> {
-    private val taskMap = ConcurrentHashMap<T, ProgressObserver<T>>()
+class DownloadWorker<T : DownloadInfo> {
+    private val taskMap = ConcurrentHashMap<T, DownloadObserver<T>>()
     private val listener: DownloadListener<T>?
     private val totalTasks: Int
     private var successCount = 0
@@ -47,11 +48,12 @@ class DownloadTask<T : DownloadInfo> {
     }
     
     private fun download(info: T) {
-        val progressObserver = ProgressObserver(info, if (listener == null) null else MyDownloadListener())
+        val progressObserver = DownloadObserver(info, if (listener == null) null else MyDownloadListener())
         taskMap[info] = progressObserver
         val interceptor = ProgressInterceptor(progressObserver)
         val client = HttpUtils.initHttpsClient(true, OkHttpClient.Builder())
-                .connectTimeout(info.connectTimeout.toLong(), TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .addInterceptor(interceptor)
                 .build()
         Retrofit.Builder()
@@ -61,7 +63,7 @@ class DownloadTask<T : DownloadInfo> {
                 .build()
                 .create(DownloadService::class.java)
                 //断点续传
-                .download("bytes=" + info.readLength + "-", info.url)              
+                .download("bytes=" + info.completionLength + "-", info.url)              
                 //失败后的retry配置
                 .retryWhen(RetryWhenException())
                 //写入文件
@@ -79,15 +81,15 @@ class DownloadTask<T : DownloadInfo> {
         override fun onStateChange(info: T, t: Throwable?) {
             listener?.onStateChange(info, t)
             if (totalTasks > 1) {
-                if (info.state == DownloadInfo.State.COMPLETED) {
+                if (info.state == TaskInfo.State.COMPLETED) {
                     taskMap.remove(info)
                     successCount++
                     (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
-                } else if (info.state == DownloadInfo.State.CANCEL || info.state == DownloadInfo.State.ERROR) {
+                } else if (info.state == TaskInfo.State.CANCEL || info.state == TaskInfo.State.ERROR) {
                     taskMap.remove(info)
                     failedCount++
                     (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
-                } else if (info.state == DownloadInfo.State.START) {
+                } else if (info.state == TaskInfo.State.START) {
                     (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
                 }
             }
@@ -142,7 +144,7 @@ class DownloadTask<T : DownloadInfo> {
     fun resume() {
         AndroidSchedulers.mainThread().scheduleDirect {
             taskMap.keys.forEach {
-                if (it.state == DownloadInfo.State.PAUSE) {
+                if (it.state == TaskInfo.State.PAUSE) {
                     download(it)
                 }
             }
@@ -154,7 +156,7 @@ class DownloadTask<T : DownloadInfo> {
      */
     fun resume(info: T) {
         AndroidSchedulers.mainThread().scheduleDirect {
-            if (info.state == DownloadInfo.State.PAUSE) {
+            if (info.state == TaskInfo.State.PAUSE) {
                 download(info)
             }
         }
@@ -179,7 +181,7 @@ class DownloadTask<T : DownloadInfo> {
             }
             randomAccessFile = RandomAccessFile(file, "rwd")
             channelOut = randomAccessFile.channel
-            val mappedBuffer = channelOut.map(FileChannel.MapMode.READ_WRITE, info.readLength, allLength - info.readLength)
+            val mappedBuffer = channelOut.map(FileChannel.MapMode.READ_WRITE, info.completionLength, allLength - info.completionLength)
             val buffer = ByteArray(1024 * 8)
             var len = inputStream.read(buffer)
             while (len != -1) {

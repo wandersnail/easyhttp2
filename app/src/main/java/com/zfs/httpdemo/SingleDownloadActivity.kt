@@ -6,7 +6,7 @@ import com.snail.commons.utils.ToastUtils
 import com.snail.network.NetworkRequester
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadListener
-import com.snail.network.download.DownloadTask
+import com.snail.network.download.DownloadWorker
 import kotlinx.android.synthetic.main.activity_single_download.*
 import java.io.File
 
@@ -19,13 +19,13 @@ import java.io.File
 class SingleDownloadActivity : BaseActivity() {
     private val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "feiyuon.apk")
     private val info = DownInfo("http://app.feiyu-tech.com:80/CM/files/file/FeiyuON-v3.1.1_2019022201.apk", file.absolutePath)
-    private var task: DownloadTask<DownInfo>? = null
+    private var worker: DownloadWorker<DownInfo>? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_download)
         btnDownload.setOnClickListener { 
-            task = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
+            worker = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
                 override fun onStateChange(info: DownInfo, t: Throwable?) {
                     t?.printStackTrace()
                     val log = when (info.state) {
@@ -48,13 +48,13 @@ class SingleDownloadActivity : BaseActivity() {
                 }
             })
         }
-        btnPause.setOnClickListener { task?.pause() }
-        btnResume.setOnClickListener { task?.resume() }
-        btnCancel.setOnClickListener { task?.cancel() }
+        btnPause.setOnClickListener { worker?.pause() }
+        btnResume.setOnClickListener { worker?.resume() }
+        btnCancel.setOnClickListener { worker?.cancel() }
     }
     
     override fun onDestroy() {
-        task?.cancel()
+        worker?.cancel()
         super.onDestroy()
     }
 }

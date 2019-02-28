@@ -1,6 +1,6 @@
 package com.snail.network.download
 
-import com.snail.network.utils.HttpUtils
+import com.snail.network.TaskInfo
 import java.io.File
 import java.util.*
 
@@ -12,26 +12,12 @@ import java.util.*
  */
 
 open class DownloadInfo @JvmOverloads constructor(
-    /** 下载url */
-    val url: String,
-    /** 下载路径 */
+    url: String,
+    /** 文件保存路径 */
     val savePath: String,
     /** 唯一标识 */
-    val tag: String = UUID.randomUUID().toString(),
-    /** 超时设置，单位秒 */
-    val connectTimeout: Int = 5) {
+    tag: String = UUID.randomUUID().toString()) : TaskInfo(url, tag) {
 
-    /** 下载状态 */
-    var state = State.IDLE
-        internal set
-    /** 基础url */
-    val baseUrl: String = HttpUtils.getBaseUrl(url)
-    /** 文件总长度 */
-    var contentLength: Long = 0
-        internal set
-    /** 已下载长度 */
-    var readLength: Long = 0
-        internal set
     /**
      * 获取下载的临时文件，下载完成后再重命名
      */
@@ -39,7 +25,7 @@ open class DownloadInfo @JvmOverloads constructor(
         get() = "$savePath.temp"
 
     internal fun reset() {
-        readLength = 0
+        completionLength = 0
         contentLength = 0
         File(temporaryFilePath).delete()
     }
@@ -50,9 +36,5 @@ open class DownloadInfo @JvmOverloads constructor(
 
     override fun hashCode(): Int {
         return url.hashCode()
-    }
-
-    enum class State {
-        IDLE, START, DOWNLOADING, COMPLETED, CANCEL, ERROR, PAUSE
     }
 }

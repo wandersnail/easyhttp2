@@ -1,0 +1,76 @@
+package com.snail.network.callback
+
+import android.annotation.SuppressLint
+import com.snail.network.TaskInfo
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+
+/**
+ *
+ *
+ * date: 2019/2/28 14:37
+ * author: zengfansheng
+ */
+abstract class TaskObserver<T : TaskInfo> @JvmOverloads constructor(protected val info: T, protected val listener: TaskStateListener<T>? = null) :
+        Observer<T>, ProgressListener {
+    private var disposable: Disposable? = null
+    private var lastUpdateTime: Long = 0//上次进度更新时间
+    
+    override fun onSubscribe(d: Disposable) {
+        disposable = d
+        info.state = TaskInfo.State.START
+        listener?.onStateChange(info, null)
+    }
+
+    override fun onNext(t: T) {
+        if (info.completionLength > 0) {
+            listener?.onProgress(info)
+        }
+    }
+
+    override fun onError(e: Throwable) {
+        info.state = TaskInfo.State.ERROR
+        listener?.onStateChange(info, e)
+    }
+
+    override fun onProgress(progress: Long, max: Long) {
+        AndroidSchedulers.mainThread().scheduleDirect {
+            var completionLength = progress
+            if (info.contentLength > max) {
+                completionLength += info.contentLength - max
+            } else {
+                info.contentLength = max
+            }
+            info.completionLength = completionLength
+            if (System.currentTimeMillis() - lastUpdateTime >= UPDATE_LIMIT_DURATION && (info.state == TaskInfo.State.IDLE ||
+                            info.state == TaskInfo.State.START || info.state == TaskInfo.State.ONGOING)) {
+                info.state = TaskInfo.State.ONGOING
+                listener?.onProgress(info)
+                lastUpdateTime = System.currentTimeMillis()
+            }
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    fun dispose(cancel: Boolean) {
+        AndroidSchedulers.mainThread().scheduleDirect {
+            disposable?.dispose()
+            if (info.state == TaskInfo.State.ONGOING || info.state == TaskInfo.State.START) {
+                if (cancel) {
+                    info.state = TaskInfo.State.CANCEL
+                    onCancel()
+                } else {
+                    info.state = TaskInfo.State.PAUSE
+                }
+                listener?.onStateChange(info, null)
+            }
+        }
+    }
+    
+    abstract fun onCancel()
+
+    companion object {
+        internal const val UPDATE_LIMIT_DURATION = 500//限制进度更新频率，毫秒
+    }
+}

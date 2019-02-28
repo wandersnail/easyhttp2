@@ -1,7 +1,6 @@
 package com.snail.network
 
 import io.reactivex.Observable
-import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.http.*
@@ -19,14 +18,6 @@ internal interface HttpService {
     @POST
     @FormUrlEncoded
     fun postForm(@Url url: String, @FieldMap map: Map<String, @JvmSuppressWildcards Any>): Observable<ResponseBody>
-
-    @POST
-    @Multipart
-    fun upload(@Url url: String, @Part file: MultipartBody.Part): Observable<ResponseBody>
-
-    @POST
-    @Multipart
-    fun upload(@Url url: String, @PartMap args: Map<String, @JvmSuppressWildcards RequestBody>, @Part file: MultipartBody.Part): Observable<ResponseBody>
 
     @POST
     @Headers("Content-Type:application/json;charset=utf-8", "Accept:application/json;")

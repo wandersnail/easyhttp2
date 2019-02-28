@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.snail.network.converter.Converter
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadListener
-import com.snail.network.download.DownloadTask
+import com.snail.network.download.DownloadWorker
 import com.snail.network.download.MultiDownloadListener
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
@@ -42,7 +42,7 @@ object NetworkRequester {
     private var lastCheckTime = System.currentTimeMillis()
 
     /**
-     * 设置自定义的Retrofit，如果不设置，请求使用默认的。对下载无效
+     * 设置自定义的Retrofit，如果不设置，请求使用默认的。对下载和上传无效
      * 
      * @param baseUrl 每一个baseUrl对应一个Retrofit
      */
@@ -94,8 +94,8 @@ object NetworkRequester {
      * @param info 下载信息
      * @param listener 下载监听
      */
-    fun <T : DownloadInfo> download(info: T, listener: DownloadListener<T>?): DownloadTask<T> {
-        return DownloadTask(info, listener)
+    fun <T : DownloadInfo> download(info: T, listener: DownloadListener<T>?): DownloadWorker<T> {
+        return DownloadWorker(info, listener)
     }
 
     /**
@@ -104,8 +104,8 @@ object NetworkRequester {
      * @param infos 下载信息
      * @param listener 下载监听
      */
-    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiDownloadListener<T>?): DownloadTask<T> {
-        return DownloadTask(infos, listener)
+    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiDownloadListener<T>?): DownloadWorker<T> {
+        return DownloadWorker(infos, listener)
     }
 
     private fun <T> toJsonBeanObservable(cls: Class<T>, observable: Observable<ResponseBody>): Observable<T> {
@@ -168,34 +168,6 @@ object NetworkRequester {
     }
 
     /**
-     * 普通POST请求
-     */
-    @JvmOverloads fun post(url: String, body: RequestBody, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).post(url, body), observer)
-    }
-
-    /**
-     * 普通POST请求，响应数据格式为json
-     * 
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> post(url: String, body: RequestBody, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).post(url, body)
-        subscribe(toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
-     * 普通POST请求
-     *
-     * @param converter 响应体转换器
-     * @param T 转到成的对象类
-     */
-    @JvmOverloads fun <T> post(url: String, body: RequestBody, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).post(url, body)
-        subscribe(convertObservable(observable, converter), observer)
-    }
-
-    /**
      * POST请求，body是json
      *
      * @param url 请求的url
@@ -213,6 +185,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun <T> postJson(url: String, json: String, cls: Class<T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
+        
         val observable = createHttpService(url).postJson(url, requestBody)
         subscribe(toJsonBeanObservable(cls, observable), observer)
     }

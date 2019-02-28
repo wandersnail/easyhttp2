@@ -1,20 +1,11 @@
 package com.snail.network.download
 
+import com.snail.network.callback.TaskStateListener
+
 /**
- *
+ *  下载监听
  *
  * date: 2019/2/23 23:21
  * author: zengfansheng
  */
-interface DownloadListener<T : DownloadInfo> {
-    /**
-     * 任务下载状态改变
-     */
-    fun onStateChange(info: T, t: Throwable?)
-
-    /**
-     * 下载进度
-     * @param info 当前下载信息
-     */
-    fun onProgress(info: T)
-}
+interface DownloadListener<T : DownloadInfo> : TaskStateListener<T>
