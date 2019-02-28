@@ -3,8 +3,8 @@ package com.zfs.httpdemo
 import android.os.Bundle
 import android.os.Environment
 import com.snail.network.NetworkRequester
+import com.snail.network.callback.MultiTaskListener
 import com.snail.network.download.DownloadWorker
-import com.snail.network.download.MultiDownloadListener
 import kotlinx.android.synthetic.main.activity_multi_download.*
 import java.io.File
 
@@ -25,7 +25,7 @@ class MultiDownloadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_multi_download)
         btnDownload.setOnClickListener {
-            worker = NetworkRequester.download(infos, object : MultiDownloadListener<DownInfo> {
+            worker = NetworkRequester.download(infos, object : MultiTaskListener<DownInfo> {
                 override fun onTotalProgress(successCount: Int, failedCount: Int, total: Int) {
                     tvProgress.text = "成功: $successCount, 失败: $failedCount, 总下载任务: $total, 剩余: ${worker?.remaining() ?: infos.size}"
                 }
@@ -37,9 +37,9 @@ class MultiDownloadActivity : BaseActivity() {
                 override fun onProgress(info: DownInfo) {
                     val index = infos.indexOf(info)
                     if (index == 0) {
-                        progressBar1.progress = (info.readLength * progressBar1.max / info.contentLength).toInt()
+                        progressBar1.progress = (info.completionLength * progressBar1.max / info.contentLength).toInt()
                     } else {
-                        progressBar2.progress = (info.readLength * progressBar2.max / info.contentLength).toInt()
+                        progressBar2.progress = (info.completionLength * progressBar2.max / info.contentLength).toInt()
                     }
                 }
             })

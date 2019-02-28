@@ -23,8 +23,8 @@ open class DownloadInfo @JvmOverloads constructor(
      */
     internal val temporaryFilePath: String
         get() = "$savePath.temp"
-
-    internal fun reset() {
+    
+    override fun reset() {
         completionLength = 0
         contentLength = 0
         File(temporaryFilePath).delete()

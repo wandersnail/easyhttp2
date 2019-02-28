@@ -1,24 +1,18 @@
 package com.snail.network
 
-import com.google.gson.Gson
+import com.snail.network.callback.MultiTaskListener
+import com.snail.network.callback.TaskListener
 import com.snail.network.converter.Converter
 import com.snail.network.download.DownloadInfo
-import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadWorker
-import com.snail.network.download.MultiDownloadListener
+import com.snail.network.upload.UploadInfo
+import com.snail.network.upload.UploadWorker
 import com.snail.network.utils.HttpUtils
-import com.snail.network.utils.IOUtils
-import com.snail.network.utils.SchedulerUtils
-import io.reactivex.Observable
 import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 import okhttp3.MediaType
-import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Retrofit
-import retrofit2.http.PartMap
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -94,7 +88,7 @@ object NetworkRequester {
      * @param info 下载信息
      * @param listener 下载监听
      */
-    fun <T : DownloadInfo> download(info: T, listener: DownloadListener<T>?): DownloadWorker<T> {
+    fun <T : DownloadInfo> download(info: T, listener: TaskListener<T>?): DownloadWorker<T> {
         return DownloadWorker(info, listener)
     }
 
@@ -104,46 +98,19 @@ object NetworkRequester {
      * @param infos 下载信息
      * @param listener 下载监听
      */
-    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiDownloadListener<T>?): DownloadWorker<T> {
+    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiTaskListener<T>?): DownloadWorker<T> {
         return DownloadWorker(infos, listener)
     }
 
-    private fun <T> toJsonBeanObservable(cls: Class<T>, observable: Observable<ResponseBody>): Observable<T> {
-        return observable.map {
-            val jsonStr = IOUtils.toString(it.byteStream(), null)
-            Gson().fromJson(jsonStr, cls)
-        }
-    }
-    
-    private fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {
-        return observable.map { converter.convert(it) }
-    }
-    
     private fun createHttpService(url: String): HttpService {
         return getRetrofit(url).create(HttpService::class.java)
-    }
-        
-    private fun <T> subscribe(observable: Observable<T>, observer: Observer<T>? = null) {
-        observable.compose(SchedulerUtils.applyObservableSchedulers()).subscribe(observer ?: object : Observer<T> {
-            override fun onComplete() {
-            }
-
-            override fun onSubscribe(d: Disposable) {
-            }
-
-            override fun onNext(t: T) {
-            }
-
-            override fun onError(e: Throwable) {
-            }
-        })
     }
     
     /**
      * 普通GET请求
      */
     @JvmOverloads fun get(url: String, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).get(url), observer)
+        HttpUtils.subscribe(createHttpService(url).get(url), observer)
     }
 
     /**
@@ -153,7 +120,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun <T> get(url: String, cls: Class<T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).get(url)
-        subscribe(toJsonBeanObservable(cls, observable), observer)
+        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
     }
 
     /**
@@ -164,7 +131,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun <T> get(url: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).get(url)
-        subscribe(convertObservable(observable, converter), observer)
+        HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
 
     /**
@@ -174,7 +141,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun postJson(url: String, json: String, observer: Observer<ResponseBody>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
-        subscribe(createHttpService(url).postJson(url, requestBody), observer)
+        HttpUtils.subscribe(createHttpService(url).postJson(url, requestBody), observer)
     }
 
     /**
@@ -187,7 +154,7 @@ object NetworkRequester {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         
         val observable = createHttpService(url).postJson(url, requestBody)
-        subscribe(toJsonBeanObservable(cls, observable), observer)
+        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
     }
 
     /**
@@ -199,7 +166,7 @@ object NetworkRequester {
     @JvmOverloads fun <T> postJson(url: String, json: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val observable = createHttpService(url).postJson(url, requestBody)
-        subscribe(convertObservable(observable, converter), observer)
+        HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
 
     /**
@@ -207,7 +174,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun postText(url: String, text: String, observer: Observer<ResponseBody>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
-        subscribe(createHttpService(url).post(url, requestBody), observer)
+        HttpUtils.subscribe(createHttpService(url).post(url, requestBody), observer)
     }
 
     /**
@@ -218,7 +185,7 @@ object NetworkRequester {
     @JvmOverloads fun <T> postText(url: String, text: String, cls: Class<T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
-        subscribe(toJsonBeanObservable(cls, observable), observer)
+        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
     }
 
     /**
@@ -230,7 +197,7 @@ object NetworkRequester {
     @JvmOverloads fun <T> postText(url: String, text: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
-        subscribe(convertObservable(observable, converter), observer)
+        HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
 
     /**
@@ -239,7 +206,7 @@ object NetworkRequester {
      * @param map 参数集合
      */
     @JvmOverloads fun postForm(url: String, map: Map<String, Any>, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).postForm(url, map), observer)
+        HttpUtils.subscribe(createHttpService(url).postForm(url, map), observer)
     }
 
     /**
@@ -250,7 +217,7 @@ object NetworkRequester {
      */
     @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, cls: Class<T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).postForm(url, map)
-        subscribe(toJsonBeanObservable(cls, observable), observer)
+        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
     }
 
     /**
@@ -261,122 +228,20 @@ object NetworkRequester {
      */
     @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).postForm(url, map)
-        subscribe(convertObservable(observable, converter), observer)
-    }
-
-    private fun createFilePart(mediaType: MediaType?, file: File): MultipartBody.Part {
-        return MultipartBody.Part.createFormData("file", file.name, RequestBody.create(mediaType, file))
+        HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
 
     /**
-     * 上传文件
+     * 上传单个文件
      */
-    @JvmOverloads fun upload(url: String, file: File, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file)), observer)
-    }
-    
-    /**
-     * 上传文件
-     */
-    @JvmOverloads fun upload(url: String, mediaType: MediaType?, file: File, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).upload(url, createFilePart(mediaType, file)), observer)
+    fun <R, T : UploadInfo<R>> upload(info: T, listener: TaskListener<T>?): UploadWorker<R, T> {
+        return UploadWorker(info, listener)
     }
 
     /**
-     * 上传文件，响应数据格式为json
-     * 
-     * @param cls Json数据模型
+     * 批量上传
      */
-    @JvmOverloads fun <T> upload(url: String, mediaType: MediaType?, file: File, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, createFilePart(mediaType, file))
-        subscribe(toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
-     * 上传文件，响应数据格式为json
-     *
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> upload(url: String, file: File, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file))
-        subscribe(toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
-     * 上传文件
-     *
-     * @param converter 响应体转换器
-     * @param T 转到成的对象类
-     */
-    @JvmOverloads fun <T> upload(url: String, mediaType: MediaType?, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, createFilePart(mediaType, file))
-        subscribe(convertObservable(observable, converter), observer)
-    }
-
-    /**
-     * 上传文件
-     *
-     * @param converter 响应体转换器
-     * @param T 转到成的对象类
-     */
-    @JvmOverloads fun <T> upload(url: String, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, createFilePart(MediaType.parse("multipart/form-data"), file))
-        subscribe(convertObservable(observable, converter), observer)
-    }
-
-    /**
-     * 上传文件，带参数
-     */
-    @JvmOverloads fun upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).upload(url, args, createFilePart(mediaType, file)), observer)
-    }
-
-    /**
-     * 上传文件，带参数
-     */
-    @JvmOverloads fun upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, observer: Observer<ResponseBody>? = null) {
-        subscribe(createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file)), observer)
-    }
-
-    /**
-     * 上传文件，带参数，响应数据格式为json
-     * 
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, args, createFilePart(mediaType, file))
-        subscribe(toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
-     * 上传文件，带参数，响应数据格式为json
-     *
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file))
-        subscribe(toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
-     * 上传文件，带参数
-     *
-     * @param converter 响应体转换器
-     * @param T 转到成的对象类
-     */
-    @JvmOverloads fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, mediaType: MediaType?, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, args, createFilePart(mediaType, file))
-        subscribe(convertObservable(observable, converter), observer)
-    }
-
-    /**
-     * 上传文件，带参数
-     *
-     * @param converter 响应体转换器
-     * @param T 转到成的对象类
-     */
-    @JvmOverloads fun <T> upload(url: String, @PartMap args: Map<String, RequestBody>, file: File, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).upload(url, args, createFilePart(MediaType.parse("multipart/form-data"), file))
-        subscribe(convertObservable(observable, converter), observer)
-    }
+    fun <R, T : UploadInfo<R>> upload(infos: List<T>, listener: MultiTaskListener<T>?): UploadWorker<R, T> {
+        return UploadWorker(infos, listener)
+    }    
 }

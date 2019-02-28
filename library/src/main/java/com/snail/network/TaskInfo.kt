@@ -27,6 +27,8 @@ abstract class TaskInfo(
     var completionLength: Long = 0
         internal set
     
+    internal open fun reset() {}
+    
     enum class State {
         IDLE, START, ONGOING, COMPLETED, CANCEL, ERROR, PAUSE
     }

@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import com.snail.network.NetworkRequester
+import com.snail.network.TaskInfo
+import com.snail.network.callback.TaskListener
 import com.snail.network.converter.StringResponseBodyConverter
+import com.snail.network.upload.UploadInfo
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_general_request.*
@@ -98,22 +101,28 @@ class GeneralRequestActivity : BaseActivity() {
             })
         }
         btnUpload.setOnClickListener { 
-            val map = HashMap<String, RequestBody>()
-            map["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
+            val args = HashMap<String, RequestBody>()
+            args["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
             val file = File(Environment.getExternalStorageDirectory(), "test.jpg")
-            NetworkRequester.upload("http://192.168.137.1:8080/testupload", map, MediaType.parse("image/jpg"), file, StringResponseBodyConverter(), object : Observer<String> {
-                override fun onComplete() {
+            val url = "http://192.168.137.1:8080/testupload"
+            val converter = StringResponseBodyConverter()
+            val info = UploadInfo(url, file, converter, null, args)
+            NetworkRequester.upload(info, object : TaskListener<UploadInfo<String>> {
+                override fun onStateChange(info: UploadInfo<String>, t: Throwable?) {
+                    t?.printStackTrace()
+                    val log = when (info.state) {
+                        TaskInfo.State.IDLE -> "闲置状态"
+                        TaskInfo.State.START -> "开始上传"
+                        TaskInfo.State.ERROR -> "上传错误, ${t?.message}"
+                        TaskInfo.State.COMPLETED -> "上传成功"
+                        TaskInfo.State.CANCEL -> "上传取消"
+                        TaskInfo.State.PAUSE -> "上传暂停"
+                        TaskInfo.State.ONGOING -> "上传中..."
+                    }
                 }
 
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: String) {
-                    tvResp.text = t
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.e("upload", "onError: ${e.message}")
+                override fun onProgress(info: UploadInfo<String>) {
+                    
                 }
             })
         }

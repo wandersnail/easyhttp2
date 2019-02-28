@@ -1,6 +1,5 @@
 package com.snail.network.callback
 
-import android.annotation.SuppressLint
 import com.snail.network.TaskInfo
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -12,8 +11,8 @@ import io.reactivex.disposables.Disposable
  * date: 2019/2/28 14:37
  * author: zengfansheng
  */
-abstract class TaskObserver<T : TaskInfo> @JvmOverloads constructor(protected val info: T, protected val listener: TaskStateListener<T>? = null) :
-        Observer<T>, ProgressListener {
+abstract class TaskObserver<R, T : TaskInfo> @JvmOverloads constructor(protected val info: T, protected val listener: TaskListener<T>? = null) :
+        Observer<R>, ProgressListener {
     private var disposable: Disposable? = null
     private var lastUpdateTime: Long = 0//上次进度更新时间
     
@@ -21,12 +20,6 @@ abstract class TaskObserver<T : TaskInfo> @JvmOverloads constructor(protected va
         disposable = d
         info.state = TaskInfo.State.START
         listener?.onStateChange(info, null)
-    }
-
-    override fun onNext(t: T) {
-        if (info.completionLength > 0) {
-            listener?.onProgress(info)
-        }
     }
 
     override fun onError(e: Throwable) {
@@ -52,7 +45,6 @@ abstract class TaskObserver<T : TaskInfo> @JvmOverloads constructor(protected va
         }
     }
 
-    @SuppressLint("CheckResult")
     fun dispose(cancel: Boolean) {
         AndroidSchedulers.mainThread().scheduleDirect {
             disposable?.dispose()

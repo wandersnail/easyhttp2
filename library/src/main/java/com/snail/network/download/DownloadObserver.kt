@@ -3,21 +3,27 @@ package com.snail.network.download
 
 import android.annotation.SuppressLint
 import com.snail.network.TaskInfo
+import com.snail.network.callback.TaskListener
 import com.snail.network.callback.TaskObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 
 /**
+ * 下载任务观察者
+ * 
  * 时间: 2017/7/8 02:33
  * 作者: zengfansheng
  * 邮箱: 43068145@qq.com
- * 功能: 各种状态监听
  */
 
-internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info: T, listener: DownloadListener<T>? = null) : TaskObserver<T>(info, listener) {
+internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info: T, listener: TaskListener<T>? = null) : TaskObserver<T, T>(info, listener) {
     override fun onCancel() {
         File(info.temporaryFilePath).delete()
+    }
+
+    override fun onNext(t: T) {
+        
     }
 
     @SuppressLint("CheckResult")
@@ -35,6 +41,7 @@ internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info
                 if (success) {
                     info.state = TaskInfo.State.COMPLETED
                     //更新进度
+                    info.completionLength = info.contentLength
                     listener?.onProgress(info)
                     listener?.onStateChange(info, null)
                 } else {

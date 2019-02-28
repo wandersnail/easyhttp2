@@ -6,7 +6,7 @@ package com.snail.network.callback
  * date: 2019/2/23 23:21
  * author: zengfansheng
  */
-interface TaskStateListener<T> {
+interface TaskListener<T> {
     /**
      * 任务上传状态改变
      */

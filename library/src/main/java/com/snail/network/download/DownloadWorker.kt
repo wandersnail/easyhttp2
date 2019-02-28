@@ -1,6 +1,9 @@
 package com.snail.network.download
 
 import com.snail.network.TaskInfo
+import com.snail.network.TaskWorker
+import com.snail.network.callback.MultiTaskListener
+import com.snail.network.callback.TaskListener
 import com.snail.network.exception.RetryWhenException
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
@@ -15,7 +18,6 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 /**
@@ -24,104 +26,43 @@ import java.util.concurrent.TimeUnit
  * date: 2019/2/23 18:13
  * author: zengfansheng
  */
-class DownloadWorker<T : DownloadInfo> {
-    private val taskMap = ConcurrentHashMap<T, DownloadObserver<T>>()
-    private val listener: DownloadListener<T>?
-    private val totalTasks: Int
-    private var successCount = 0
-    private var failedCount = 0
+class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
     
-    internal constructor(info: T, listener: DownloadListener<T>?) {
-        this.listener = listener  
-        totalTasks = 1
-        info.reset()
-        download(info)
-    }
+    internal constructor(info: T, listener: TaskListener<T>?) : super(info, listener)
     
-    internal constructor(infos: List<T>, listener: MultiDownloadListener<T>?) {
-        this.listener = listener
-        totalTasks = infos.size
-        infos.forEach {
-            it.reset()
-            download(it)
-        }
-    }
-    
-    private fun download(info: T) {
-        val progressObserver = DownloadObserver(info, if (listener == null) null else MyDownloadListener())
-        taskMap[info] = progressObserver
-        val interceptor = ProgressInterceptor(progressObserver)
+    internal constructor(infos: List<T>, listener: MultiTaskListener<T>?) : super(infos, listener)
+
+    override fun execute(info: T) {
+        //如果listener为空，说明不需要监听，不为空则在本地监听后，再传出去
+        val observer = DownloadObserver(info, if (listener == null) null else LocalTaskListener())
+        taskMap[info] = observer
+        val interceptor = ProgressInterceptor(observer)
         val client = HttpUtils.initHttpsClient(true, OkHttpClient.Builder())
-                .readTimeout(5, TimeUnit.SECONDS)
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .addInterceptor(interceptor)
-                .build()
+            .readTimeout(5, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .addInterceptor(interceptor)
+            .build()
         Retrofit.Builder()
-                .client(client)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .baseUrl(info.baseUrl)
-                .build()
-                .create(DownloadService::class.java)
-                //断点续传
-                .download("bytes=" + info.completionLength + "-", info.url)              
-                //失败后的retry配置
-                .retryWhen(RetryWhenException())
-                //写入文件
-                .map(object : Function<ResponseBody, T> {
-                    override fun apply(responseBody: ResponseBody): T {
-                        writeToDisk(responseBody, File(info.temporaryFilePath), info)
-                        return info
-                    }
-                })
-                .compose(SchedulerUtils.applyObservableSchedulers())
-                .subscribe(progressObserver)
-    }
-        
-    private inner class MyDownloadListener : DownloadListener<T> {
-        override fun onStateChange(info: T, t: Throwable?) {
-            listener?.onStateChange(info, t)
-            if (totalTasks > 1) {
-                if (info.state == TaskInfo.State.COMPLETED) {
-                    taskMap.remove(info)
-                    successCount++
-                    (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
-                } else if (info.state == TaskInfo.State.CANCEL || info.state == TaskInfo.State.ERROR) {
-                    taskMap.remove(info)
-                    failedCount++
-                    (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
-                } else if (info.state == TaskInfo.State.START) {
-                    (listener as? MultiDownloadListener<T>)?.onTotalProgress(successCount, failedCount, totalTasks)
+            .client(client)
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(info.baseUrl)
+            .build()
+            .create(DownloadService::class.java)
+            //断点续传
+            .download("bytes=" + info.completionLength + "-", info.url)
+            //失败后的retry配置
+            .retryWhen(RetryWhenException())
+            //写入文件
+            .map(object : Function<ResponseBody, T> {
+                override fun apply(responseBody: ResponseBody): T {
+                    writeToDisk(responseBody, File(info.temporaryFilePath), info)
+                    return info
                 }
-            }
-        }
-
-        override fun onProgress(info: T) {
-            listener?.onProgress(info)
-        }
-    }
-
-    /**
-     * 进行中的下载任务数
-     */
-    fun remaining(): Int {
-        return taskMap.size
+            })
+            .compose(SchedulerUtils.applyObservableSchedulers())
+            .subscribe(observer)
     }
     
-    /**
-     * 取消所有下载
-     */
-    fun cancel() {
-        taskMap.values.forEach { it.dispose(true) }
-        taskMap.clear()
-    }
-
-    /**
-     * 取消单个下载
-     */
-    fun cancel(info: T) {
-        taskMap.remove(info)?.dispose(true)
-    }
-
     /**
      * 暂停所有下载
      */
@@ -145,7 +86,7 @@ class DownloadWorker<T : DownloadInfo> {
         AndroidSchedulers.mainThread().scheduleDirect {
             taskMap.keys.forEach {
                 if (it.state == TaskInfo.State.PAUSE) {
-                    download(it)
+                    execute(it)
                 }
             }
         }
@@ -157,7 +98,7 @@ class DownloadWorker<T : DownloadInfo> {
     fun resume(info: T) {
         AndroidSchedulers.mainThread().scheduleDirect {
             if (info.state == TaskInfo.State.PAUSE) {
-                download(info)
+                execute(info)
             }
         }
     }

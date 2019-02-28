@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.os.Environment
 import com.snail.commons.utils.ToastUtils
 import com.snail.network.NetworkRequester
-import com.snail.network.download.DownloadInfo
-import com.snail.network.download.DownloadListener
+import com.snail.network.TaskInfo
+import com.snail.network.callback.TaskListener
 import com.snail.network.download.DownloadWorker
 import kotlinx.android.synthetic.main.activity_single_download.*
 import java.io.File
@@ -25,17 +25,17 @@ class SingleDownloadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_download)
         btnDownload.setOnClickListener { 
-            worker = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
+            worker = NetworkRequester.download(info, object : TaskListener<DownInfo> {
                 override fun onStateChange(info: DownInfo, t: Throwable?) {
                     t?.printStackTrace()
                     val log = when (info.state) {
-                        DownloadInfo.State.IDLE -> "闲置状态"
-                        DownloadInfo.State.START -> "开始下载"
-                        DownloadInfo.State.ERROR -> "下载错误, ${t?.message}"
-                        DownloadInfo.State.COMPLETED -> "下载成功"
-                        DownloadInfo.State.CANCEL -> "下载取消"
-                        DownloadInfo.State.PAUSE -> "下载暂停"
-                        DownloadInfo.State.DOWNLOADING -> "下载中..."
+                        TaskInfo.State.IDLE -> "闲置状态"
+                        TaskInfo.State.START -> "开始下载"
+                        TaskInfo.State.ERROR -> "下载错误, ${t?.message}"
+                        TaskInfo.State.COMPLETED -> "下载成功"
+                        TaskInfo.State.CANCEL -> "下载取消"
+                        TaskInfo.State.PAUSE -> "下载暂停"
+                        TaskInfo.State.ONGOING -> "下载中..."
                     }
                     tvState.text = log
                     if (log.isNotEmpty()) {
@@ -44,7 +44,7 @@ class SingleDownloadActivity : BaseActivity() {
                 }
 
                 override fun onProgress(info: DownInfo) {
-                    progressBar.progress = (info.readLength * progressBar.max / info.contentLength).toInt()
+                    progressBar.progress = (info.completionLength * progressBar.max / info.contentLength).toInt()
                 }
             })
         }

@@ -1,7 +1,13 @@
 package com.snail.network.utils
 
+import com.google.gson.Gson
+import com.snail.network.converter.Converter
 import com.snail.network.factory.Tls12SocketFactory
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import java.io.IOException
 import java.io.InputStream
 import java.security.KeyStore
@@ -163,5 +169,32 @@ object HttpUtils {
             builder.sslSocketFactory(socketFactory, UnSafeTrustManager())
         }
         return builder
+    }
+
+    internal fun <T> toJsonBeanObservable(cls: Class<T>, observable: Observable<ResponseBody>): Observable<T> {
+        return observable.map {
+            val jsonStr = IOUtils.toString(it.byteStream(), null)
+            Gson().fromJson(jsonStr, cls)
+        }
+    }
+
+    internal fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {
+        return observable.map { converter.convert(it) }
+    }
+    
+    internal fun <T> subscribe(observable: Observable<T>, observer: Observer<T>? = null) {
+        observable.compose(SchedulerUtils.applyObservableSchedulers()).subscribe(observer ?: object : Observer<T> {
+            override fun onComplete() {
+            }
+
+            override fun onSubscribe(d: Disposable) {
+            }
+
+            override fun onNext(t: T) {
+            }
+
+            override fun onError(e: Throwable) {
+            }
+        })
     }
 }
