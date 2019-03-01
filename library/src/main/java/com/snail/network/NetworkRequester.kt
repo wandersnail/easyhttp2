@@ -45,7 +45,7 @@ object NetworkRequester {
         customRetrofitBuilderMap[url] = builder
         //替换缓存里已有的
         if (retrofitCache[url] != null) {
-            retrofitCache[url] = RetrofitHolder(builder.build(), System.currentTimeMillis())
+            retrofitCache[url] = RetrofitHolder(builder.baseUrl(baseUrl).build(), System.currentTimeMillis())
         }
     }
     
