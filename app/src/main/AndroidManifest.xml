@@ -33,6 +33,12 @@
         <activity
             android:name=".GeneralRequestActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
+        <activity
+            android:name=".MultiUploadActivity"
+            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
+        <activity
+            android:name=".SingleUploadActivity"
+            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
     </application>
 
 </manifest>

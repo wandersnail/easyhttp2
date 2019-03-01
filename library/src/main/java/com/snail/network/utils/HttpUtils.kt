@@ -1,6 +1,5 @@
 package com.snail.network.utils
 
-import com.google.gson.Gson
 import com.snail.network.converter.Converter
 import com.snail.network.factory.Tls12SocketFactory
 import io.reactivex.Observable
@@ -169,13 +168,6 @@ object HttpUtils {
             builder.sslSocketFactory(socketFactory, UnSafeTrustManager())
         }
         return builder
-    }
-
-    internal fun <T> toJsonBeanObservable(cls: Class<T>, observable: Observable<ResponseBody>): Observable<T> {
-        return observable.map {
-            val jsonStr = IOUtils.toString(it.byteStream(), null)
-            Gson().fromJson(jsonStr, cls)
-        }
     }
 
     internal fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {

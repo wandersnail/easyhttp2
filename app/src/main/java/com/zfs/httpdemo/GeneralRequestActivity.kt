@@ -1,20 +1,14 @@
 package com.zfs.httpdemo
 
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import com.snail.network.NetworkRequester
-import com.snail.network.TaskInfo
-import com.snail.network.callback.TaskListener
-import com.snail.network.converter.StringResponseBodyConverter
-import com.snail.network.upload.UploadInfo
+import com.snail.network.converter.JsonResponseConverter
+import com.snail.network.converter.StringResponseConverter
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_general_request.*
-import okhttp3.MediaType
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
-import java.io.File
 
 /**
  *
@@ -46,7 +40,7 @@ class GeneralRequestActivity : BaseActivity() {
             })
         }
         btnPostText.setOnClickListener {
-            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseBodyConverter(), object : Observer<String> {
+            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
@@ -63,7 +57,7 @@ class GeneralRequestActivity : BaseActivity() {
             })          
         }
         btnPostJson.setOnClickListener {
-            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseBodyConverter(), object : Observer<String> {
+            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : Observer<String> {
                 override fun onComplete() {
                 }
 
@@ -83,7 +77,7 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, Any>()
             map["postForm"] = "laomao"
             map["password"] = 123456
-            NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, BaseResp::class.java, object : Observer<BaseResp> {
+            NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object : Observer<BaseResp> {
                 override fun onComplete() {
                 }
 
@@ -97,32 +91,6 @@ class GeneralRequestActivity : BaseActivity() {
 
                 override fun onError(e: Throwable) {
                     Log.e("postForm", "onError: ${e.message}")
-                }
-            })
-        }
-        btnUpload.setOnClickListener { 
-            val args = HashMap<String, RequestBody>()
-            args["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
-            val file = File(Environment.getExternalStorageDirectory(), "test.jpg")
-            val url = "http://192.168.137.1:8080/testupload"
-            val converter = StringResponseBodyConverter()
-            val info = UploadInfo(url, file, converter, null, args)
-            NetworkRequester.upload(info, object : TaskListener<UploadInfo<String>> {
-                override fun onStateChange(info: UploadInfo<String>, t: Throwable?) {
-                    t?.printStackTrace()
-                    val log = when (info.state) {
-                        TaskInfo.State.IDLE -> "闲置状态"
-                        TaskInfo.State.START -> "开始上传"
-                        TaskInfo.State.ERROR -> "上传错误, ${t?.message}"
-                        TaskInfo.State.COMPLETED -> "上传成功"
-                        TaskInfo.State.CANCEL -> "上传取消"
-                        TaskInfo.State.PAUSE -> "上传暂停"
-                        TaskInfo.State.ONGOING -> "上传中..."
-                    }
-                }
-
-                override fun onProgress(info: UploadInfo<String>) {
-                    
                 }
             })
         }

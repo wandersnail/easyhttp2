@@ -1,6 +1,7 @@
-package com.snail.network.download
+package com.snail.network.interceptor
 
 import com.snail.network.callback.ProgressListener
+import com.snail.network.download.ProgressResponseBody
 import okhttp3.Interceptor
 import okhttp3.Response
 

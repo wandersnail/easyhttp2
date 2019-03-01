@@ -1,6 +1,5 @@
 package com.snail.network.upload
 
-import com.snail.network.TaskInfo
 import com.snail.network.callback.TaskListener
 import com.snail.network.callback.TaskObserver
 
@@ -20,10 +19,6 @@ internal class UploadObserver<R, T : UploadInfo<R>> @JvmOverloads constructor(in
     }
     
     override fun onComplete() {
-        //更新进度
-        info.completionLength = info.contentLength
-        listener?.onProgress(info)
-        info.state = TaskInfo.State.COMPLETED
-        listener?.onStateChange(info, null)
+        handleSuccess()
     }
 }

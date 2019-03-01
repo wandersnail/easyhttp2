@@ -37,32 +37,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btnUpload"
-            android:textSize="12dp"
-            android:minWidth="0dp"
-            android:text="upload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/btnSelectFile"
-            android:textSize="12dp"
-            android:minWidth="0dp"
-            android:text="select file"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        
-        <TextView
-            android:id="@+id/tvPath"
-            android:textSize="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
     
     <TextView
         android:text="响应数据:"

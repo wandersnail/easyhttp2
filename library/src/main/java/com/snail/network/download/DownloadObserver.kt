@@ -39,11 +39,7 @@ internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info
             }
             AndroidSchedulers.mainThread().scheduleDirect {
                 if (success) {
-                    info.state = TaskInfo.State.COMPLETED
-                    //更新进度
-                    info.completionLength = info.contentLength
-                    listener?.onProgress(info)
-                    listener?.onStateChange(info, null)
+                    handleSuccess()
                 } else {
                     info.state = TaskInfo.State.ERROR
                     listener?.onStateChange(info, Throwable("Renaming to target file failed"))

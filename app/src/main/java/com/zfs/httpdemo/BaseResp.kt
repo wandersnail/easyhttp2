@@ -9,4 +9,8 @@ package com.zfs.httpdemo
 class BaseResp {
     var code = 0
     var msg = ""
+    
+    override fun toString(): String {
+        return "BaseResp(code=$code, msg='$msg')"
+    }
 }

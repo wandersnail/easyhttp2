@@ -5,6 +5,7 @@ import com.snail.network.TaskWorker
 import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.TaskListener
 import com.snail.network.exception.RetryWhenException
+import com.snail.network.interceptor.ProgressInterceptor
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
@@ -18,7 +19,6 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
-import java.util.concurrent.TimeUnit
 
 /**
  * 下载任务
@@ -38,8 +38,6 @@ class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
         taskMap[info] = observer
         val interceptor = ProgressInterceptor(observer)
         val client = HttpUtils.initHttpsClient(true, OkHttpClient.Builder())
-            .readTimeout(5, TimeUnit.SECONDS)
-            .connectTimeout(5, TimeUnit.SECONDS)
             .addInterceptor(interceptor)
             .build()
         Retrofit.Builder()

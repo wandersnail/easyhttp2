@@ -17,8 +17,8 @@ import java.io.File
 class MultiDownloadActivity : BaseActivity() {
     private val file1 = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "feiyuon1.apk")
     private val file2 = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "feiyuon2.apk")
-    private val infos = arrayListOf(DownInfo("http://app.feiyu-tech.com:80/CM/files/file/FeiyuON3.0.0_2018092601.apk", file1.absolutePath),
-            DownInfo("http://app.feiyu-tech.com:80/CM/files/file/FeiyuON-fullv3.0.2_2018093001.apk", file2.absolutePath))
+    private val infos = arrayListOf(DownInfo("http://app.feiyu-tech.com/CM/files/file/FyBtTool-release-v1.5.1_2018121801.apk", file1.absolutePath),
+            DownInfo("http://app.feiyu-tech.com/CM/files/file/FyBtTool-release-v1.5.0_2018121801.apk", file2.absolutePath))
     private var worker: DownloadWorker<DownInfo>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

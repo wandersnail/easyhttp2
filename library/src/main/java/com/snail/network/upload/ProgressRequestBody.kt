@@ -5,10 +5,10 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.internal.Util
 import okio.BufferedSink
-import okio.Okio
-import okio.Source
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
 
 /**
  *
@@ -27,18 +27,20 @@ internal class ProgressRequestBody(private val contentType: MediaType?, private 
 
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
-        var source: Source? = null
+        var inputStream: InputStream? = null
         var uploaded = 0L
-        val uploadCount = 50000L//一次上传多少
         try {
-            source = Okio.source(file)
-            source.read(sink.buffer(), uploadCount)
-            uploaded += uploadCount
-            if (contentLength() > 0 && uploaded > 0) {
+            val buffer = ByteArray(50000)//一次上传多少
+            inputStream = FileInputStream(file)
+            var len = inputStream.read(buffer)
+            while (len != -1) {
+                sink.write(buffer, 0, len)
+                uploaded += len
                 listener?.onProgress(uploaded, contentLength())
+                len = inputStream.read(buffer)
             }
         } finally {
-            Util.closeQuietly(source)
+            Util.closeQuietly(inputStream)
         }
     }
 }

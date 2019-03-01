@@ -2,7 +2,7 @@ package com.snail.network
 
 import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.TaskListener
-import com.snail.network.converter.Converter
+import com.snail.network.converter.ResponseConverter
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadWorker
 import com.snail.network.upload.UploadInfo
@@ -114,22 +114,12 @@ object NetworkRequester {
     }
 
     /**
-     * 普通GET请求，响应数据格式为json
-     * 
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> get(url: String, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).get(url)
-        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
      * 普通GET请求
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> get(url: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
+    @JvmOverloads fun <T> get(url: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).get(url)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
@@ -145,25 +135,12 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是json，响应数据格式为json
-     *
-     * @param url 请求的url
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> postJson(url: String, json: String, cls: Class<T>, observer: Observer<T>? = null) {
-        val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
-        
-        val observable = createHttpService(url).postJson(url, requestBody)
-        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
      * POST请求，body是json
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postJson(url: String, json: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
+    @JvmOverloads fun <T> postJson(url: String, json: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val observable = createHttpService(url).postJson(url, requestBody)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
@@ -178,23 +155,12 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是字符串，响应数据格式为json
-     * 
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> postText(url: String, text: String, cls: Class<T>, observer: Observer<T>? = null) {
-        val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
-        val observable = createHttpService(url).post(url, requestBody)
-        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
      * POST请求，body是字符串
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postText(url: String, text: String, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
+    @JvmOverloads fun <T> postText(url: String, text: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
@@ -210,23 +176,12 @@ object NetworkRequester {
     }
 
     /**
-     * POST提交表单，响应数据格式为json
-     *
-     * @param map 参数集合
-     * @param cls Json数据模型
-     */
-    @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, cls: Class<T>, observer: Observer<T>? = null) {
-        val observable = createHttpService(url).postForm(url, map)
-        HttpUtils.subscribe(HttpUtils.toJsonBeanObservable(cls, observable), observer)
-    }
-
-    /**
      * POST提交表单
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, converter: Converter<ResponseBody, T>, observer: Observer<T>? = null) {
+    @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
         val observable = createHttpService(url).postForm(url, map)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }

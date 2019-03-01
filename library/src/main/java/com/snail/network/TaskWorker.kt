@@ -60,6 +60,13 @@ abstract class TaskWorker<R, T : TaskInfo> {
     }
 
     /**
+     * 任务是否正在进行
+     */
+    fun isOngoing(): Boolean {
+        return remaining() > 0
+    }
+    
+    /**
      * 进行中的下载任务数
      */
     fun remaining(): Int {

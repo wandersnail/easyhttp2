@@ -18,7 +18,7 @@ import java.io.File
  */
 class SingleDownloadActivity : BaseActivity() {
     private val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "feiyuon.apk")
-    private val info = DownInfo("http://app.feiyu-tech.com:80/CM/files/file/FeiyuON-v3.1.1_2019022201.apk", file.absolutePath)
+    private val info = DownInfo("http://app.feiyu-tech.com/CM/files/file/FyBtTool-release-v1.5.1_2018121801.apk", file.absolutePath)
     private var worker: DownloadWorker<DownInfo>? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {

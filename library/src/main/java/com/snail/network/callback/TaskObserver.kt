@@ -38,11 +38,28 @@ abstract class TaskObserver<R, T : TaskInfo> @JvmOverloads constructor(protected
             info.completionLength = completionLength
             if (System.currentTimeMillis() - lastUpdateTime >= UPDATE_LIMIT_DURATION && (info.state == TaskInfo.State.IDLE ||
                             info.state == TaskInfo.State.START || info.state == TaskInfo.State.ONGOING)) {
-                info.state = TaskInfo.State.ONGOING
-                listener?.onProgress(info)
+                if (info.state != TaskInfo.State.ONGOING) {
+                    info.state = TaskInfo.State.ONGOING
+                    listener?.onStateChange(info, null)
+                }
+                updateProgress()
                 lastUpdateTime = System.currentTimeMillis()
             }
         }
+    }
+    
+    private fun updateProgress() {
+        if (info.completionLength > 0 && info.contentLength > 0) {
+            listener?.onProgress(info)
+        }
+    }
+    
+    protected fun handleSuccess() {
+        //更新进度
+        info.completionLength = info.contentLength
+        updateProgress()
+        info.state = TaskInfo.State.COMPLETED
+        listener?.onStateChange(info, null)
     }
 
     fun dispose(cancel: Boolean) {
