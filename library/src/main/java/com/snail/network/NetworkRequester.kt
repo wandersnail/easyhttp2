@@ -53,6 +53,7 @@ object NetworkRequester {
     private fun cleanExpired() {
         //30s清理一次
         if (System.currentTimeMillis() - lastCheckTime >= 30000) {
+            lastCheckTime = System.currentTimeMillis()
             val iterator = retrofitCache.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
@@ -64,7 +65,7 @@ object NetworkRequester {
         }        
     }
     
-    fun getRetrofit(baseUrl: String): Retrofit {
+    private fun getRetrofit(baseUrl: String): Retrofit {
         val url = HttpUtils.getBaseUrl(baseUrl)
         var holder = retrofitCache[url]
         //如果缓存里没有，通过设置的RetrofitBuilder创建，如果没有设置，使用默认
@@ -73,7 +74,7 @@ object NetworkRequester {
             holder = if (builder != null) {
                 RetrofitHolder(builder.build(), System.currentTimeMillis())
             } else {
-                RetrofitHolder(RetrofitBuilder.getDefaultRetrofit(url), System.currentTimeMillis())
+                RetrofitHolder(RetrofitBuilder.getDefaultRetrofitBuilder(url).build(), System.currentTimeMillis())
             }
         } else {
             holder.activeTime = System.currentTimeMillis()
@@ -160,7 +161,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postText(url: String, text: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
+    fun <T> postText(url: String, text: String, converter: ResponseConverter<T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val observable = createHttpService(url).post(url, requestBody)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
@@ -181,7 +182,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
+    fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>, observer: Observer<T>) {
         val observable = createHttpService(url).postForm(url, map)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }

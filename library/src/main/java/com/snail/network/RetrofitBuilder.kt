@@ -99,8 +99,6 @@ class RetrofitBuilder {
         return this
     }
 
-    
-
     /**
      * Create the [Retrofit] instance using the configured values.
      * 
@@ -111,7 +109,7 @@ class RetrofitBuilder {
         if (baseUrl != null) {
             builder.baseUrl(HttpUtils.getBaseUrl(baseUrl!!))
         }
-        builder.client(if (client == null) getDefaultClient(bypassAuth) else client!!)
+        builder.client(if (client == null) getDefaultClientBuilder(bypassAuth).build() else client!!)
         builder.validateEagerly(validateEagerly)
         if (callFactory != null) {
             builder.callFactory(callFactory!!)
@@ -129,18 +127,18 @@ class RetrofitBuilder {
     }
     
     companion object {
-        fun getDefaultRetrofit(baseUrl: String): Retrofit {
+        @JvmOverloads 
+        fun getDefaultRetrofitBuilder(baseUrl: String, bypassAuth: Boolean = false): RetrofitBuilder {
             return RetrofitBuilder().baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(getDefaultClient(false))
-                .addConverterFactory(GsonConverterFactory.create()).build()
+                .client(getDefaultClientBuilder(bypassAuth).build())
+                .addConverterFactory(GsonConverterFactory.create())
         }
 
-        fun getDefaultClient(bypassAuth: Boolean): OkHttpClient {
+        fun getDefaultClientBuilder(bypassAuth: Boolean): OkHttpClient.Builder {
             return HttpUtils.initHttpsClient(bypassAuth, OkHttpClient().newBuilder())
                 .readTimeout(5, TimeUnit.SECONDS)
                 .connectTimeout(5, TimeUnit.SECONDS)
-                .build()
         }
     }
 }

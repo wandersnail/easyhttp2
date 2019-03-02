@@ -1,12 +1,14 @@
 package com.snail.network.callback
 
+import com.snail.network.TaskInfo
+
 /**
  *
  *
  * date: 2019/2/23 23:21
  * author: zengfansheng
  */
-interface TaskListener<T> {
+interface TaskListener<T : TaskInfo> {
     /**
      * 任务上传状态改变
      */
