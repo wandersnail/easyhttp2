@@ -120,7 +120,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> get(url: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
+    fun <T> get(url: String, converter: ResponseConverter<T>, observer: Observer<T>) {
         val observable = createHttpService(url).get(url)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
     }
@@ -141,7 +141,7 @@ object NetworkRequester {
      * @param converter 响应体转换器
      * @param T 转到成的对象类
      */
-    @JvmOverloads fun <T> postJson(url: String, json: String, converter: ResponseConverter<T>, observer: Observer<T>? = null) {
+    fun <T> postJson(url: String, json: String, converter: ResponseConverter<T>, observer: Observer<T>) {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val observable = createHttpService(url).postJson(url, requestBody)
         HttpUtils.subscribe(HttpUtils.convertObservable(observable, converter), observer)
