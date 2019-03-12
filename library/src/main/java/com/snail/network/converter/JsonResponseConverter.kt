@@ -2,7 +2,6 @@ package com.snail.network.converter
 
 import com.google.gson.Gson
 import com.snail.network.exception.ConvertException
-import com.snail.network.utils.IOUtils
 import okhttp3.ResponseBody
 
 /**
@@ -14,8 +13,7 @@ import okhttp3.ResponseBody
 class JsonResponseConverter<T>(private val cls: Class<T>) : ResponseConverter<T> {
     override fun convert(value: ResponseBody): T {
         try {
-            val jsonStr = IOUtils.toString(value.byteStream(), null)
-            return Gson().fromJson(jsonStr, cls)
+            return Gson().fromJson(value.string(), cls)
         } catch (e: Throwable) {
             throw ConvertException(e.message, e)
         }
