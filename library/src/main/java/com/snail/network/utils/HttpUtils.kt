@@ -175,7 +175,7 @@ object HttpUtils {
     }
     
     internal fun <T> subscribe(observable: Observable<T>, observer: Observer<T>? = null) {
-        observable.compose(SchedulerUtils.applyObservableSchedulers()).subscribe(observer ?: object : Observer<T> {
+        observable.compose(SchedulerUtils.applyGeneralObservableSchedulers()).subscribe(observer ?: object : Observer<T> {
             override fun onComplete() {
             }
 

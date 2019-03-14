@@ -57,7 +57,7 @@ class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
                     return info
                 }
             })
-            .compose(SchedulerUtils.applyObservableSchedulers())
+            .compose(SchedulerUtils.applyGeneralObservableSchedulers())
             .subscribe(observer)
     }
     
