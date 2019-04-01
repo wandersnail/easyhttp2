@@ -3,7 +3,7 @@ apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
-def lib_version = '1.0.8'
+def lib_version = '1.0.9'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -26,13 +26,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
     compileOnly "androidx.appcompat:appcompat:$appcompat_version"
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "com.squareup.retrofit2:retrofit:$retrofit2_version"
-    api "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
-    api "com.squareup.retrofit2:converter-gson:$retrofit2_version"
-    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    compileOnly "com.squareup.retrofit2:retrofit:$retrofit2_version"
+    compileOnly "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
+    compileOnly "com.squareup.retrofit2:converter-gson:$retrofit2_version"
+    compileOnly "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+    compileOnly "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
 }
 
 // 打包源码

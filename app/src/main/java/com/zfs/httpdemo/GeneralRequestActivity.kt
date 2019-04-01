@@ -2,6 +2,7 @@ package com.zfs.httpdemo
 
 import android.os.Bundle
 import android.util.Log
+import com.snail.network.Configuration
 import com.snail.network.NetworkRequester
 import com.snail.network.converter.JsonResponseConverter
 import com.snail.network.converter.StringResponseConverter
@@ -21,7 +22,9 @@ class GeneralRequestActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_general_request)
         btnGet.setOnClickListener { 
-            NetworkRequester.get("http://192.168.137.1:8080/testapi?username=get&password=123456", object : Observer<ResponseBody> {
+            val config = Configuration()
+            config.callTimeout = 4
+            NetworkRequester.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : Observer<ResponseBody> {
                 override fun onComplete() {
                 }
 

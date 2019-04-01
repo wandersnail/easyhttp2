@@ -5,6 +5,7 @@ import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.ProgressListener
 import com.snail.network.callback.TaskListener
 import com.snail.network.utils.HttpUtils
+import com.snail.network.utils.SchedulerUtils
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -41,7 +42,9 @@ class UploadWorker<R, T : UploadInfo<R>> : TaskWorker<R, T> {
         } else {//带参数
             service.upload(info.url, info.args, createFilePart(info.mediaType, info.file, observer))
         }
-        HttpUtils.subscribe(HttpUtils.convertObservable(observable, info.converter), observer)
+        HttpUtils.convertObservable(observable, info.converter)
+            .compose(SchedulerUtils.applyGeneralObservableSchedulers())
+            .subscribe(observer)
     }
     
     private fun createFilePart(mediaType: MediaType?, file: File, listener: ProgressListener?): MultipartBody.Part {

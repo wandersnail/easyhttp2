@@ -3,8 +3,6 @@ package com.snail.network.utils
 import com.snail.network.converter.Converter
 import com.snail.network.factory.Tls12SocketFactory
 import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import java.io.IOException
@@ -172,21 +170,5 @@ object HttpUtils {
 
     internal fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {
         return observable.map { converter.convert(it) }
-    }
-    
-    internal fun <T> subscribe(observable: Observable<T>, observer: Observer<T>? = null) {
-        observable.compose(SchedulerUtils.applyGeneralObservableSchedulers()).subscribe(observer ?: object : Observer<T> {
-            override fun onComplete() {
-            }
-
-            override fun onSubscribe(d: Disposable) {
-            }
-
-            override fun onNext(t: T) {
-            }
-
-            override fun onError(e: Throwable) {
-            }
-        })
     }
 }
