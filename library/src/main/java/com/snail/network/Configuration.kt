@@ -11,7 +11,7 @@ import retrofit2.Retrofit
 class Configuration {
     /** 是否绕过认证，也就是无条件信任所有HTTPS网站 */
     var bypassAuth = false
-    /** 整个请求的超时时长，单位：秒，有值为大于0 */
+    /** 整个请求的超时时长，单位：秒，有效值：大于0 */
     var callTimeout = 0
     var retrofit: Retrofit? = null
     internal var service: HttpService? = null
