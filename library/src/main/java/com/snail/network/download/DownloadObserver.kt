@@ -14,7 +14,6 @@ import java.io.File
  * 
  * 时间: 2017/7/8 02:33
  * 作者: zengfansheng
- * 邮箱: 43068145@qq.com
  */
 
 internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info: T, listener: TaskListener<T>? = null) : TaskObserver<T, T>(info, listener) {

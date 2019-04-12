@@ -11,7 +11,6 @@ import java.util.concurrent.TimeoutException
 /**
  * 时间: 2017/7/8 22:16
  * 作者: zengfansheng
- * 邮箱: 43068145@qq.com
  * 功能:
  */
 

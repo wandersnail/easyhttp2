@@ -10,7 +10,6 @@ import java.io.IOException
 /**
  * 时间: 2017/7/6 14:50
  * 作者: zengfansheng
- * 邮箱: 43068145@qq.com
  * 
  * @param listener 进度监听
  */

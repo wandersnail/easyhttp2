@@ -3,7 +3,6 @@ package com.snail.network.callback
 /**
  * 时间: 2017/7/8 20:23
  * 作者: zengfansheng
- * 邮箱: 43068145@qq.com
  * 功能: 下载进度监听
  */
 
