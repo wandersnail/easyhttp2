@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import com.snail.commons.utils.FileUtils
 import com.snail.fileselector.FileSelector
+import com.snail.fileselector.OnFileSelectListener
 import com.snail.network.NetworkRequester
 import com.snail.network.TaskInfo
 import com.snail.network.callback.MultiTaskListener
@@ -30,19 +31,21 @@ class MultiUploadActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_multi_upload)
-        fileSelector.setMultiSelect(true)
-        fileSelector.setSelectFile(true)
+        fileSelector.setMultiSelectionEnabled(true)
+        fileSelector.setSelectionMode(FileSelector.FILES_ONLY)
         btnCancel.setOnClickListener {
             worker?.cancel()
         }
-        fileSelector.setOnFileSelectListener { list ->
-            paths.removeAll(list)
-            paths.addAll(list)
-            paths.forEach {
-                tvPath.append(it)
-                tvPath.append("\n")
+        fileSelector.setOnFileSelectListener(object : OnFileSelectListener {
+            override fun onFileSelect(paths: List<String>) {
+                this@MultiUploadActivity.paths.removeAll(paths)
+                this@MultiUploadActivity.paths.addAll(paths)
+                this@MultiUploadActivity.paths.forEach {
+                    tvPath.append(it)
+                    tvPath.append("\n")
+                }
             }
-        }
+        })
         btnSelectFile.setOnClickListener {
             fileSelector.select(this)
         }

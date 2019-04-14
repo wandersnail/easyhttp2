@@ -3,6 +3,7 @@ package com.zfs.httpdemo
 import android.content.Intent
 import android.os.Bundle
 import com.snail.fileselector.FileSelector
+import com.snail.fileselector.OnFileSelectListener
 import com.snail.network.NetworkRequester
 import com.snail.network.TaskInfo
 import com.snail.network.callback.TaskListener
@@ -28,12 +29,13 @@ class SingleUploadActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_upload)
-        fileSelector.setMultiSelect(false)
-        fileSelector.setSelectFile(true)
-        fileSelector.setOnFileSelectListener { 
-            path = it[0]
-            tvPath.text = path
-        }
+        fileSelector.setSelectionMode(FileSelector.FILES_ONLY)
+        fileSelector.setOnFileSelectListener(object : OnFileSelectListener {
+            override fun onFileSelect(paths: List<String>) {
+                path = paths[0]
+                tvPath.text = path
+            }
+        })
         btnSelectFile.setOnClickListener { 
             fileSelector.select(this)
         }

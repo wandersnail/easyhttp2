@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.snail.commons.base.BaseHolder
-import com.snail.commons.base.BaseListAdapter
-import com.snail.commons.entity.PermissionsRequester
+import com.snail.commons.helper.PermissionsRequester
 import com.snail.commons.utils.ToastUtils
+import com.snail.widget.listview.BaseListAdapter
+import com.snail.widget.listview.BaseViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -23,15 +23,15 @@ class MainActivity : AppCompatActivity() {
         val clsArr = arrayListOf(SingleDownloadActivity::class.java, MultiDownloadActivity::class.java, GeneralRequestActivity::class.java,
                 SingleUploadActivity::class.java, MultiUploadActivity::class.java)
         lv.adapter = object : BaseListAdapter<String>(this, data) {
-            override fun getHolder(position: Int): BaseHolder<String> {
-                return object : BaseHolder<String>() {
+            override fun createViewHolder(position: Int): BaseViewHolder<String> {
+                return object : BaseViewHolder<String>() {
                     private var tv: TextView? = null
 
-                    override fun setData(data: String, position: Int) {
-                        tv?.text = data
+                    override fun onBind(item: String, position: Int) {
+                        tv?.text = item
                     }
 
-                    override fun createConvertView(): View {
+                    override fun createView(): View {
                         val view = View.inflate(this@MainActivity, android.R.layout.simple_list_item_1, null)
                         tv = view.findViewById(android.R.id.text1)
                         return view
