@@ -28,6 +28,7 @@ object HttpUtils {
         var trustManager: X509TrustManager? = null
     }
 
+    @JvmStatic
     fun getSslSocketFactory(certificates: Array<InputStream>?, bksFile: InputStream?, password: String?): SSLParams {
         val sslParams = SSLParams()
         try {
@@ -137,6 +138,7 @@ object HttpUtils {
     /**
      * 截取baseurl
      */
+    @JvmStatic
     fun getBaseUrl(url: String): String {
         var index = url.indexOf("://")
         val subUrl = url.substring(index + 3)
@@ -147,6 +149,7 @@ object HttpUtils {
         } else url
     }
 
+    @JvmStatic
     fun initHttpsClient(isBypassAuth: Boolean, builder: OkHttpClient.Builder): OkHttpClient.Builder {
         if (isBypassAuth) {
             val sslParams = getSslSocketFactory(null, null, null)

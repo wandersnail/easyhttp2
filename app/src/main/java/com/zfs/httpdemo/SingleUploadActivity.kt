@@ -43,7 +43,7 @@ class SingleUploadActivity : BaseActivity() {
                 val args = HashMap<String, RequestBody>()
                 args["upload"] = RequestBody.create(MediaType.parse("text/plain"), "Hello")
                 val file = File(path)
-                val url = "http://192.168.137.1:8080/testupload"
+                val url = "https://www.blindx.cn/smart/customer/log"
                 val converter = JsonResponseConverter(BaseResp::class.java)
                 val info = UploadInfo(url, file, converter, null, args)
                 worker = NetworkRequester.upload(info, object : TaskListener<UploadInfo<BaseResp>> {

@@ -11,30 +11,35 @@ import io.reactivex.schedulers.Schedulers
  * author: zengfansheng
  */
 object SchedulerUtils {
+    @JvmStatic
     fun <T> applyGeneralObservableSchedulers(): ObservableTransformer<T, T> {
         return ObservableTransformer {
             it.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         }
     }
-    
+
+    @JvmStatic
     fun <T> applyGeneralFlowableSchedulers(): FlowableTransformer<T, T> {
         return FlowableTransformer {
             it.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         }
     }
-    
+
+    @JvmStatic
     fun <T> applyGeneralSingleSchedulers(): SingleTransformer<T, T> {
         return SingleTransformer { 
             it.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         }
     }
 
+    @JvmStatic
     fun <T> applyGeneralMaybeSchedulers(): MaybeTransformer<T, T> {
         return MaybeTransformer {
             it.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         }
     }
 
+    @JvmStatic
     fun applyGeneralCompletableSchedulers(): CompletableTransformer {
         return CompletableTransformer {
             it.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())

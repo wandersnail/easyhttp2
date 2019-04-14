@@ -11,7 +11,6 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.net.URLEncoder
 
@@ -33,7 +32,6 @@ class UploadWorker<R, T : UploadInfo<R>> : TaskWorker<R, T> {
         val service = Retrofit.Builder()
             .client(HttpUtils.initHttpsClient(true, OkHttpClient.Builder()).build())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(info.baseUrl)
             .build()
             .create(UploadService::class.java)

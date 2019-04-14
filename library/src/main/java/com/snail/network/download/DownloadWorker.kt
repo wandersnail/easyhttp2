@@ -10,7 +10,6 @@ import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Function
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Retrofit
@@ -51,12 +50,10 @@ class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
             //失败后的retry配置
             .retryWhen(RetryWhenException())
             //写入文件
-            .map(object : Function<ResponseBody, T> {
-                override fun apply(responseBody: ResponseBody): T {
-                    writeToDisk(responseBody, File(info.temporaryFilePath), info)
-                    return info
-                }
-            })
+            .map { responseBody ->
+                writeToDisk(responseBody, File(info.temporaryFilePath), info)
+                info
+            }
             .compose(SchedulerUtils.applyGeneralObservableSchedulers())
             .subscribe(observer)
     }

@@ -80,6 +80,6 @@ abstract class TaskObserver<R, T : TaskInfo> @JvmOverloads constructor(protected
     abstract fun onCancel()
 
     companion object {
-        internal const val UPDATE_LIMIT_DURATION = 500//限制进度更新频率，毫秒
+        private const val UPDATE_LIMIT_DURATION = 500//限制进度更新频率，毫秒
     }
 }
