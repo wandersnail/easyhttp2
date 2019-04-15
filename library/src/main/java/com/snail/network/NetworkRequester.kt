@@ -5,7 +5,6 @@ import com.snail.network.callback.TaskListener
 import com.snail.network.converter.ResponseConverter
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadWorker
-import com.snail.network.factory.FastJsonConverterFactory
 import com.snail.network.upload.UploadInfo
 import com.snail.network.upload.UploadWorker
 import com.snail.network.utils.HttpUtils
@@ -39,7 +38,6 @@ object NetworkRequester {
             config.retrofit = Retrofit.Builder().baseUrl(url)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)
-                .addConverterFactory(FastJsonConverterFactory.create())
                 .build()
         }
         config.service = config.retrofit!!.create(HttpService::class.java)
