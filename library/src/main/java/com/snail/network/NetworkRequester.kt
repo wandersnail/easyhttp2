@@ -82,7 +82,7 @@ object NetworkRequester {
         return UploadWorker(infos, listener)
     }
 
-    private fun <T> subscribe(observable: Observable<T>, configuration: Configuration, callback: RequestCallback<T>? = null) {
+    private fun <T> subscribe(observable: Observable<T>, configuration: Configuration, callback: RequestCallback<T>?) {
         observable.compose(SchedulerUtils.applyGeneralObservableSchedulers()).subscribe(GeneralRequestTask(configuration, callback))
     }
     

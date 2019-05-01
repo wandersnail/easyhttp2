@@ -14,7 +14,8 @@ import java.util.concurrent.TimeoutException
  * author: zengfansheng
  */
 internal class GeneralRequestTask<T>(private val configuration: Configuration, private val callback: RequestCallback<T>?) : Observer<T> {
-    private var disposable: Disposable? = null
+    var disposable: Disposable? = null
+        private set
     private var handler: Handler? = null
     private var secondCount = 0
     private var timerRunnable: Runnable? = null
