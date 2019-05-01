@@ -1,5 +1,6 @@
 ## 代码托管
 [![](https://jitpack.io/v/wandersnail/network-requester.svg)](https://jitpack.io/#wandersnail/network-requester)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.wandersnail/network-requester/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.wandersnail/network-requester)
 [![Download](https://api.bintray.com/packages/wandersnail/android/network-requester/images/download.svg) ](https://bintray.com/wandersnail/android/network-requester/_latestVersion)
 
 ## 使用
