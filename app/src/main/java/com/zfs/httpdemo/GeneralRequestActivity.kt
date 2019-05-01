@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import com.snail.network.Configuration
 import com.snail.network.NetworkRequester
+import com.snail.network.callback.RequestCallback
 import com.snail.network.converter.JsonResponseConverter
 import com.snail.network.converter.StringResponseConverter
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_general_request.*
 import okhttp3.ResponseBody
 
@@ -24,55 +23,38 @@ class GeneralRequestActivity : BaseActivity() {
         btnGet.setOnClickListener { 
             val config = Configuration()
             config.callTimeout = 4
-            NetworkRequester.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : Observer<ResponseBody> {
-                override fun onComplete() {
-                }
-
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: ResponseBody) {
-                    val resp = t.string()
+            NetworkRequester.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : RequestCallback<ResponseBody> {
+                override fun onSuccess(parsedResp: ResponseBody) {
+                    val resp = parsedResp.string()
                     Log.e("get", "onNext: $resp")
                     tvResp.text = resp
                 }
 
-                override fun onError(e: Throwable) {
-                    Log.e("get", "onError: ${e.message}")
+                override fun onError(t: Throwable) {
+                    Log.e("get", "onError: ${t.message}")
                 }
             })
         }
         btnPostText.setOnClickListener {
-            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : Observer<String> {
-                override fun onComplete() {
+            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
+                override fun onSuccess(parsedResp: String) {
+                    tvResp.text = parsedResp
                 }
 
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: String) {
-                    tvResp.text = t
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.e("btnPostText", "onError: ${e.message}")
+                override fun onError(t: Throwable) {
+                    Log.e("btnPostText", "onError: ${t.message}")
                 }
             })          
         }
         btnPostJson.setOnClickListener {
-            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : Observer<String> {
-                override fun onComplete() {
+            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
+
+                override fun onSuccess(parsedResp: String) {
+                    tvResp.text = parsedResp
                 }
 
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: String) {
-                    tvResp.text = t
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.e("btnPostText", "onError: ${e.message}")
+                override fun onError(t: Throwable) {
+                    Log.e("btnPostText", "onError: ${t.message}")
                 }
             })
         }
@@ -80,20 +62,15 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, Any>()
             map["postForm"] = "laomao"
             map["password"] = 123456
-            NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object : Observer<BaseResp> {
-                override fun onComplete() {
+            NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object : RequestCallback<BaseResp> {
+
+                override fun onSuccess(parsedResp: BaseResp) {
+                    Log.e("postForm", "onNext: code = ${parsedResp.code}, msg = ${parsedResp.msg}")
+                    tvResp.text = "code = ${parsedResp.code}, msg = ${parsedResp.msg}"
                 }
 
-                override fun onSubscribe(d: Disposable) {                    
-                }
-
-                override fun onNext(t: BaseResp) {
-                    Log.e("postForm", "onNext: code = ${t.code}, msg = ${t.msg}")
-                    tvResp.text = "code = ${t.code}, msg = ${t.msg}"
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.e("postForm", "onError: ${e.message}")
+                override fun onError(t: Throwable) {
+                    Log.e("postForm", "onError: ${t.message}")
                 }
             })
         }

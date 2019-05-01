@@ -2,6 +2,7 @@ package com.snail.network
 
 import android.os.Handler
 import android.os.Looper
+import com.snail.network.callback.RequestCallback
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeoutException
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeoutException
  * date: 2019/4/1 11:47
  * author: zengfansheng
  */
-internal class GeneralRequestTask<T>(private val configuration: Configuration, private val observer: Observer<T>?) : Observer<T> {
+internal class GeneralRequestTask<T>(private val configuration: Configuration, private val callback: RequestCallback<T>?) : Observer<T> {
     private var disposable: Disposable? = null
     private var handler: Handler? = null
     private var secondCount = 0
@@ -32,7 +33,7 @@ internal class GeneralRequestTask<T>(private val configuration: Configuration, p
                 handler?.postDelayed(this, 1000)
             } else {
                 disposable?.dispose()
-                observer?.onError(TimeoutException("Http请求超时！"))
+                callback?.onError(TimeoutException("Http请求超时！"))
             }
         }
     }
@@ -40,22 +41,20 @@ internal class GeneralRequestTask<T>(private val configuration: Configuration, p
     override fun onComplete() {
         disposable = null
         handler?.removeCallbacks(timerRunnable)
-        observer?.onComplete()
     }
 
     override fun onSubscribe(d: Disposable) {
         disposable = d
-        handler?.postDelayed(timerRunnable, 1000)
-        observer?.onSubscribe(d)
+        handler?.postDelayed(timerRunnable, 1000)        
     }
 
     override fun onNext(t: T) {
-        observer?.onNext(t)
+        callback?.onSuccess(t)
     }
 
     override fun onError(e: Throwable) {
         disposable = null
         handler?.removeCallbacks(timerRunnable)
-        observer?.onError(e)
+        callback?.onError(e)
     }
 }

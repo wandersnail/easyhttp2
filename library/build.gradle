@@ -2,8 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'maven'
 
-def lib_version = '1.1.2'
+def lib_version = '1.2.0'
+group = "com.github.wandersnail"
+version = lib_version
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -38,22 +41,55 @@ dependencies {
     implementation "com.alibaba:fastjson:$fastjson_version"
 }
 
-// 打包源码
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-artifacts {
-    archives sourcesJar
-}
-
 publish {
-    repoName="android"//仓库名
+    repoName = "android"//仓库名
     userOrg = 'wandersnail' //bintray.com用户名  
     groupId = 'com.github.wandersnail' //jcenter上的路径  
     artifactId = 'network-requester' //项目名称  
     publishVersion = lib_version //版本号  
     desc = 'http网络请求'
     website = 'https://github.com/wandersnail'
+}
+
+if (project.getGradle().startParameter.taskNames.any { it.contains('bintrayUpload') }) {
+    gradle.taskGraph.whenReady { taskGraph ->
+        taskGraph.getAllTasks().find {
+            it.path == ":$project.name:generatePomFileForReleasePublication"
+        }.doLast {
+            file("build/publications/maven/pom-default.xml").delete()
+            println 'Overriding pom-file to make sure we can sync to maven central!'
+            pom {
+                //noinspection GroovyAssignabilityCheck
+                project {
+                    name "network-requester"
+                    artifactId 'network-requester'
+                    packaging 'aar'
+                    description 'Android http网络请求'
+                    url 'https://github.com/wandersnail'
+                    version lib_version
+
+                    scm {
+                        url 'https://github.com/wandersnail/network-requester'
+                        connection 'scm:git:https://github.com/wandersnail/network-requester.git'
+                        developerConnection 'scm:git:https://github.com/wandersnail/network-requester.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'wandersnail'
+                            name 'Zeng Fansheng'
+                            email 'bingmo977@qq.com'
+                        }
+                    }
+                }
+            }.writeTo("build/publications/maven/pom-default.xml")
+        }
+    }
 }
