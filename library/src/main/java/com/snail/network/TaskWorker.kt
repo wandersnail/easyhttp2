@@ -3,6 +3,7 @@ package com.snail.network
 import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.TaskListener
 import com.snail.network.callback.TaskObserver
+import io.reactivex.disposables.Disposable
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -11,12 +12,13 @@ import java.util.concurrent.ConcurrentHashMap
  * date: 2019/2/28 20:11
  * author: zengfansheng
  */
-abstract class TaskWorker<R, T : TaskInfo> {
+abstract class TaskWorker<R, T : TaskInfo> : Disposable {
     protected val taskMap = ConcurrentHashMap<T, TaskObserver<R, T>>()
     protected val listener: TaskListener<T>?
     private val totalTasks: Int
     private var successCount = 0
     private var failedCount = 0
+    private var isCanceled = false
     
     internal constructor(info: T, listener: TaskListener<T>?) {
         this.listener = listener
@@ -76,15 +78,29 @@ abstract class TaskWorker<R, T : TaskInfo> {
     /**
      * 取消所有下载
      */
+    @Synchronized
     fun cancel() {
         taskMap.values.forEach { it.dispose(true) }
         taskMap.clear()
+        isCanceled = true
     }
 
     /**
      * 取消单个下载
      */
+    @Synchronized
     fun cancel(info: T) {
         taskMap.remove(info)?.dispose(true)
+        if (taskMap.isEmpty()) {
+            isCanceled = true
+        }
+    }
+
+    override fun isDisposed(): Boolean {
+        return isCanceled
+    }
+
+    override fun dispose() {
+        cancel()
     }
 }
