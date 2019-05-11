@@ -9,7 +9,7 @@
 ```
 dependencies {
 	...
-	implementation 'com.github.wandersnail:network-requester:1.0.0'
+	implementation 'com.github.wandersnail:network-requester:1.2.2'
 }
 ```
 
