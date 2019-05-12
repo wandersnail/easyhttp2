@@ -2,6 +2,7 @@ package com.snail.network.download
 
 import io.reactivex.Observable
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Streaming
@@ -16,5 +17,5 @@ import retrofit2.http.Url
 internal interface DownloadService {
     @Streaming
     @GET
-    fun download(@Header("RANGE") offset: String, @Url url: String): Observable<ResponseBody>
+    fun download(@Header("RANGE") offset: String, @Url url: String): Observable<Response<ResponseBody>>
 }

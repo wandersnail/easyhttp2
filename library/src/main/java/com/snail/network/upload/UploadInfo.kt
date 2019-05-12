@@ -4,6 +4,7 @@ import com.snail.network.TaskInfo
 import com.snail.network.converter.ResponseConverter
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import okhttp3.Response
 import java.io.File
 import java.util.*
 
@@ -28,5 +29,10 @@ open class UploadInfo<R> @JvmOverloads constructor(
     /**
      * 服务端响应数据
      */
-    var response: R? = null
+    var response: Response? = null
+
+    /**
+     * 转换过的body
+     */
+    var convertedBody: R? = null
 }

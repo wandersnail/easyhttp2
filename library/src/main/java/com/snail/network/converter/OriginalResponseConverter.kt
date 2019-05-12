@@ -1,6 +1,5 @@
 package com.snail.network.converter
 
-import com.snail.network.exception.ConvertException
 import okhttp3.ResponseBody
 
 /**
@@ -10,11 +9,7 @@ import okhttp3.ResponseBody
  * author: zengfansheng
  */
 class OriginalResponseConverter : ResponseConverter<ResponseBody> {
-    override fun convert(value: ResponseBody?): ResponseBody {
-        try {
-            return value!!
-        } catch (e: Throwable) {
-            throw ConvertException(e.message, e)
-        }
+    override fun convert(value: ResponseBody?): ResponseBody? {
+        return value
     }
 }

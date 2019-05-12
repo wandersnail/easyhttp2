@@ -40,9 +40,7 @@ class UploadWorker<R, T : UploadInfo<R>> : TaskWorker<R, T> {
         } else {//带参数
             service.upload(info.url, info.args, createFilePart(info.mediaType, info.file, observer))
         }
-        observable.map { info.converter.convert(it) }
-            .compose(SchedulerUtils.applyGeneralObservableSchedulers())
-            .subscribe(observer)
+        observable.compose(SchedulerUtils.applyGeneralObservableSchedulers()).subscribe(observer)
     }
     
     private fun createFilePart(mediaType: MediaType?, file: File, listener: ProgressListener?): MultipartBody.Part {

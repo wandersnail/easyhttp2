@@ -4,6 +4,8 @@ import com.snail.network.TaskInfo
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 /**
  *
@@ -11,8 +13,8 @@ import io.reactivex.disposables.Disposable
  * date: 2019/2/28 14:37
  * author: zengfansheng
  */
-abstract class TaskObserver<R, T : TaskInfo> @JvmOverloads constructor(protected val info: T, protected val listener: TaskListener<T>? = null) :
-        Observer<R>, ProgressListener {
+abstract class TaskObserver<T : TaskInfo> @JvmOverloads constructor(protected val info: T, protected val listener: TaskListener<T>? = null) :
+        Observer<Response<ResponseBody>>, ProgressListener {
     private var disposable: Disposable? = null
     private var lastUpdateTime: Long = 0//上次进度更新时间
     

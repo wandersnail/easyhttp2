@@ -10,11 +10,11 @@ import okhttp3.ResponseBody
  * author: zengfansheng
  */
 class StringResponseConverter : ResponseConverter<String> {
-    override fun convert(value: ResponseBody?): String {
-        try {
-            return value!!.string()
-        } catch (e: Throwable) {
-            throw ConvertException(e.message, e)
+    override fun convert(value: ResponseBody?): String? {
+        if (value == null) {
+            throw ConvertException("ResponseBody is null")
+        } else {
+            return value.string()
         }
     }
 }

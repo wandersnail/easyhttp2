@@ -10,7 +10,7 @@ import okhttp3.Response
  * author: zengfansheng
  */
 interface RequestCallback<T> {
-    fun onSuccess(response: Response, parsedBody: T)
+    fun onSuccess(response: Response, convertedBody: T?)
     
     fun onError(t: Throwable)
 }

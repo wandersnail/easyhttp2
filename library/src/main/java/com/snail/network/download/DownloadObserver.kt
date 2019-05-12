@@ -7,6 +7,8 @@ import com.snail.network.callback.TaskListener
 import com.snail.network.callback.TaskObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.io.File
 
 /**
@@ -16,12 +18,12 @@ import java.io.File
  * 作者: zengfansheng
  */
 
-internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info: T, listener: TaskListener<T>? = null) : TaskObserver<T, T>(info, listener) {
+internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(info: T, listener: TaskListener<T>? = null) : TaskObserver<T>(info, listener) {
     override fun onCancel() {
         File(info.temporaryFilePath).delete()
     }
 
-    override fun onNext(t: T) {
+    override fun onNext(t: Response<ResponseBody>) {
         
     }
 

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  * author: zengfansheng
  */
 abstract class TaskWorker<R, T : TaskInfo> : Disposable {
-    protected val taskMap = ConcurrentHashMap<T, TaskObserver<R, T>>()
+    protected val taskMap = ConcurrentHashMap<T, TaskObserver<T>>()
     protected val listener: TaskListener<T>?
     private val totalTasks: Int
     private var successCount = 0

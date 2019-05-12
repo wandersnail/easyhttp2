@@ -49,9 +49,9 @@ class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
             //失败后的retry配置
             .retryWhen(RetryWhenException())
             //写入文件
-            .map { responseBody ->
-                writeToDisk(responseBody, File(info.temporaryFilePath), info)
-                info
+            .map {
+                writeToDisk(it.body(), File(info.temporaryFilePath), info)
+                it
             }
             .compose(SchedulerUtils.applyGeneralObservableSchedulers())
             .subscribe(observer)
