@@ -1,10 +1,7 @@
 package com.snail.network.utils
 
-import com.snail.network.converter.Converter
 import com.snail.network.factory.Tls12SocketFactory
-import io.reactivex.Observable
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import java.io.IOException
 import java.io.InputStream
 import java.security.KeyStore
@@ -169,9 +166,5 @@ object HttpUtils {
             builder.sslSocketFactory(socketFactory, UnSafeTrustManager())
         }
         return builder
-    }
-
-    internal fun <T> convertObservable(observable: Observable<ResponseBody>, converter: Converter<ResponseBody, T>): Observable<T> {
-        return observable.map { converter.convert(it) }
     }
 }

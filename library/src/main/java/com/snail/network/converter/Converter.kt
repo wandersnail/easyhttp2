@@ -13,5 +13,5 @@ import com.snail.network.exception.ConvertException
  */
 interface Converter<S, T> {
     @Throws(ConvertException::class)
-    fun convert(value: S): T
+    fun convert(value: S?): T
 }

@@ -3,6 +3,7 @@ package com.snail.network
 import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.RequestCallback
 import com.snail.network.callback.TaskListener
+import com.snail.network.converter.OriginalResponseConverter
 import com.snail.network.converter.ResponseConverter
 import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadWorker
@@ -15,6 +16,7 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.util.concurrent.TimeUnit
@@ -82,8 +84,8 @@ object NetworkRequester {
         return UploadWorker(infos, listener)
     }
 
-    private fun <T> subscribe(observable: Observable<T>, configuration: Configuration, callback: RequestCallback<T>?): Disposable {
-        return GeneralRequestTask(observable, configuration, callback).disposable!!
+    private fun <T> subscribe(observable: Observable<Response<ResponseBody>>, converter: ResponseConverter<T>, configuration: Configuration, callback: RequestCallback<T>?): Disposable {
+        return GeneralRequestTask(observable, converter, configuration, callback).disposable!!
     }
     
     /**
@@ -92,7 +94,7 @@ object NetworkRequester {
     @JvmStatic
     fun get(url: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val config = getConfiguration(url, null)
-        return subscribe(config.service!!.get(url), config, callback)
+        return subscribe(config.service!!.get(url), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -101,7 +103,7 @@ object NetworkRequester {
     @JvmStatic
     fun get(configuration: Configuration, url: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val config = getConfiguration(url, configuration)
-        return subscribe(config.service!!.get(url), config, callback)
+        return subscribe(config.service!!.get(url), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -113,7 +115,7 @@ object NetworkRequester {
     @JvmStatic
     fun <T> get(url: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, null)
-        return subscribe(HttpUtils.convertObservable(config.service!!.get(url), converter), config, callback)
+        return subscribe(config.service!!.get(url), converter, config, callback)
     }
 
     /**
@@ -125,7 +127,7 @@ object NetworkRequester {
     @JvmStatic
     fun <T> get(configuration: Configuration, url: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, configuration)
-        return subscribe(HttpUtils.convertObservable(config.service!!.get(url), converter), config, callback)
+        return subscribe(config.service!!.get(url), converter, config, callback)
     }
 
     /**
@@ -137,7 +139,7 @@ object NetworkRequester {
     fun postJson(url: String, json: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, null)
-        return subscribe(config.service!!.postJson(url, requestBody), config, callback)
+        return subscribe(config.service!!.postJson(url, requestBody), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -149,7 +151,7 @@ object NetworkRequester {
     fun postJson(configuration: Configuration, url: String, json: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, configuration)
-        return subscribe(config.service!!.postJson(url, requestBody), config, callback)
+        return subscribe(config.service!!.postJson(url, requestBody), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -163,7 +165,7 @@ object NetworkRequester {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, null)
         val observable = config.service!!.postJson(url, requestBody)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 
     /**
@@ -177,7 +179,7 @@ object NetworkRequester {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, configuration)
         val observable = config.service!!.postJson(url, requestBody)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 
     /**
@@ -187,7 +189,7 @@ object NetworkRequester {
     fun postText(url: String, text: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, null)
-        return subscribe(config.service!!.post(url, requestBody), config, callback)
+        return subscribe(config.service!!.post(url, requestBody), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -197,7 +199,7 @@ object NetworkRequester {
     fun postText(configuration: Configuration, url: String, text: String, callback: RequestCallback<ResponseBody>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, configuration)
-        return subscribe(config.service!!.post(url, requestBody), config, callback)
+        return subscribe(config.service!!.post(url, requestBody), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -211,7 +213,7 @@ object NetworkRequester {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, null)
         val observable = config.service!!.post(url, requestBody)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 
     /**
@@ -225,7 +227,7 @@ object NetworkRequester {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, configuration)
         val observable = config.service!!.post(url, requestBody)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 
     /**
@@ -236,7 +238,7 @@ object NetworkRequester {
     @JvmStatic
     fun postForm(url: String, map: Map<String, Any>, callback: RequestCallback<ResponseBody>?): Disposable {
         val config = getConfiguration(url, null)
-        return subscribe(config.service!!.postForm(url, map), config, callback)
+        return subscribe(config.service!!.postForm(url, map), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -247,7 +249,7 @@ object NetworkRequester {
     @JvmStatic
     fun postForm(configuration: Configuration, url: String, map: Map<String, Any>, callback: RequestCallback<ResponseBody>?): Disposable {
         val config = getConfiguration(url, configuration)
-        return subscribe(config.service!!.postForm(url, map), config, callback)
+        return subscribe(config.service!!.postForm(url, map), OriginalResponseConverter(), config, callback)
     }
 
     /**
@@ -260,7 +262,7 @@ object NetworkRequester {
     fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, null)
         val observable = config.service!!.postForm(url, map)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 
     /**
@@ -273,6 +275,6 @@ object NetworkRequester {
     fun <T> postForm(configuration: Configuration, url: String, map: Map<String, Any>, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, configuration)
         val observable = config.service!!.postForm(url, map)
-        return subscribe(HttpUtils.convertObservable(observable, converter), config, callback)
+        return subscribe(observable, converter, config, callback)
     }
 }

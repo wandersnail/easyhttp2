@@ -11,9 +11,9 @@ import okhttp3.ResponseBody
  * author: zengfansheng
  */
 class JsonResponseConverter<T>(private val cls: Class<T>) : ResponseConverter<T> {
-    override fun convert(value: ResponseBody): T {
+    override fun convert(value: ResponseBody?): T {
         try {
-            return JSON.parseObject(value.string(), cls)
+            return JSON.parseObject(value!!.string(), cls)
         } catch (e: Throwable) {
             throw ConvertException(e.message, e)
         }

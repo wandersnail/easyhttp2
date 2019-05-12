@@ -1,5 +1,8 @@
 package com.snail.network.callback
 
+import okhttp3.Response
+
+
 /**
  * 请求结果回调
  *
@@ -7,7 +10,7 @@ package com.snail.network.callback
  * author: zengfansheng
  */
 interface RequestCallback<T> {
-    fun onSuccess(parsedResp: T)
+    fun onSuccess(response: Response, parsedBody: T)
     
     fun onError(t: Throwable)
 }

@@ -8,6 +8,7 @@ import com.snail.network.callback.RequestCallback
 import com.snail.network.converter.JsonResponseConverter
 import com.snail.network.converter.StringResponseConverter
 import kotlinx.android.synthetic.main.activity_general_request.*
+import okhttp3.Response
 import okhttp3.ResponseBody
 
 /**
@@ -24,8 +25,8 @@ class GeneralRequestActivity : BaseActivity() {
             val config = Configuration()
             config.callTimeout = 4
             NetworkRequester.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : RequestCallback<ResponseBody> {
-                override fun onSuccess(parsedResp: ResponseBody) {
-                    val resp = parsedResp.string()
+                override fun onSuccess(response: Response, parsedBody: ResponseBody) {
+                    val resp = parsedBody.string()
                     Log.e("get", "onNext: $resp")
                     tvResp.text = resp
                 }
@@ -37,8 +38,8 @@ class GeneralRequestActivity : BaseActivity() {
         }
         btnPostText.setOnClickListener {
             NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
-                override fun onSuccess(parsedResp: String) {
-                    tvResp.text = parsedResp
+                override fun onSuccess(response: Response, parsedBody: String) {
+                    tvResp.text = parsedBody
                 }
 
                 override fun onError(t: Throwable) {
@@ -49,8 +50,8 @@ class GeneralRequestActivity : BaseActivity() {
         btnPostJson.setOnClickListener {
             NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
 
-                override fun onSuccess(parsedResp: String) {
-                    tvResp.text = parsedResp
+                override fun onSuccess(response: Response, parsedBody: String) {
+                    tvResp.text = parsedBody
                 }
 
                 override fun onError(t: Throwable) {
@@ -64,9 +65,9 @@ class GeneralRequestActivity : BaseActivity() {
             map["password"] = 123456
             NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object : RequestCallback<BaseResp> {
 
-                override fun onSuccess(parsedResp: BaseResp) {
-                    Log.e("postForm", "onNext: code = ${parsedResp.code}, msg = ${parsedResp.msg}")
-                    tvResp.text = "code = ${parsedResp.code}, msg = ${parsedResp.msg}"
+                override fun onSuccess(response: Response, parsedBody: BaseResp) {
+                    Log.e("postForm", "onNext: code = ${parsedBody.code}, msg = ${parsedBody.msg}")
+                    tvResp.text = "code = ${parsedBody.code}, msg = ${parsedBody.msg}"
                 }
 
                 override fun onError(t: Throwable) {

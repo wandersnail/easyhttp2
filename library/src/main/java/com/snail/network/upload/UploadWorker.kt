@@ -40,7 +40,7 @@ class UploadWorker<R, T : UploadInfo<R>> : TaskWorker<R, T> {
         } else {//带参数
             service.upload(info.url, info.args, createFilePart(info.mediaType, info.file, observer))
         }
-        HttpUtils.convertObservable(observable, info.converter)
+        observable.map { info.converter.convert(it) }
             .compose(SchedulerUtils.applyGeneralObservableSchedulers())
             .subscribe(observer)
     }

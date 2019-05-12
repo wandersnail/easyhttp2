@@ -3,9 +3,12 @@ package com.snail.network
 import android.os.Handler
 import android.os.Looper
 import com.snail.network.callback.RequestCallback
+import com.snail.network.converter.ResponseConverter
 import com.snail.network.utils.SchedulerUtils
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.util.concurrent.TimeoutException
 
 /**
@@ -14,7 +17,7 @@ import java.util.concurrent.TimeoutException
  * date: 2019/4/1 11:47
  * author: zengfansheng
  */
-internal class GeneralRequestTask<T>(observable: Observable<T>, private val configuration: Configuration, private val callback: RequestCallback<T>?) {
+internal class GeneralRequestTask<T>(observable: Observable<Response<ResponseBody>>, converter: ResponseConverter<T>, private val configuration: Configuration, private val callback: RequestCallback<T>?) {
     var disposable: Disposable? = null
         private set
     private var handler: Handler? = null
@@ -29,7 +32,11 @@ internal class GeneralRequestTask<T>(observable: Observable<T>, private val conf
             handler?.postDelayed(timerRunnable, 1000)
         }
         disposable = observable.compose(SchedulerUtils.applyGeneralObservableSchedulers()).subscribe({
-            callback?.onSuccess(it)
+            try {
+                callback?.onSuccess(it.raw(), converter.convert(it.body()))
+            } catch (t: Throwable) {
+                callback?.onError(t)
+            }            
         }, {
             disposable = null
             handler?.removeCallbacks(timerRunnable)
