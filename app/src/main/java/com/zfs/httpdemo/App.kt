@@ -3,7 +3,7 @@ package com.zfs.httpdemo
 import android.app.Application
 import android.os.Environment
 import com.snail.commons.AppHolder
-import com.snail.commons.helper.CrashHandler
+import com.snail.commons.entity.CrashHandler
 import java.io.File
 
 /**

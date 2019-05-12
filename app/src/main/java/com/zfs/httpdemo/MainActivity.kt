@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.snail.commons.helper.PermissionsRequester
+import com.snail.commons.entity.PermissionsRequester
 import com.snail.commons.utils.ToastUtils
 import com.snail.widget.listview.BaseListAdapter
 import com.snail.widget.listview.BaseViewHolder
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         requester?.checkAndRequest(list)
         requester?.setOnRequestResultListener(object : PermissionsRequester.OnRequestResultListener {
             override fun onRequestResult(refusedPermissions: MutableList<String>) {
-                if (!refusedPermissions.isEmpty()) {
+                if (refusedPermissions.isNotEmpty()) {
                     ToastUtils.showShort("部分权限被拒绝，可能造成某些功能无法使用")
                 }
             }
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        requester?.onActivityResult(requestCode, resultCode, data)
+        requester?.onActivityResult(requestCode)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
