@@ -19,9 +19,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val data = arrayListOf("单文件下载", "多文件下载", "普通请求", "单文件上传", "多文件上传")
+        val data = arrayListOf("单文件下载", "多文件下载", "普通请求", "文件上传")
         val clsArr = arrayListOf(SingleDownloadActivity::class.java, MultiDownloadActivity::class.java, GeneralRequestActivity::class.java,
-                SingleUploadActivity::class.java, MultiUploadActivity::class.java)
+                SingleUploadActivity::class.java)
         lv.adapter = object : BaseListAdapter<String>(this, data) {
             override fun createViewHolder(position: Int): BaseViewHolder<String> {
                 return object : BaseViewHolder<String>() {

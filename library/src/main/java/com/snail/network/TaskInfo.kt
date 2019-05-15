@@ -15,18 +15,11 @@ abstract class TaskInfo(
         /** 唯一标识 */
         val tag: String = UUID.randomUUID().toString()) {
 
-    /** 下载状态 */
+    /** 任务状态 */
     var state = State.IDLE
         internal set
     /** 基础url */
-    val baseUrl: String = HttpUtils.getBaseUrl(url)
-    /** 进度：总长度 */
-    var contentLength: Long = 0
-        internal set
-    /** 进度：已完成长度 */
-    var completionLength: Long = 0
-        internal set
-    
+    val baseUrl: String = HttpUtils.getBaseUrl(url)    
     internal open fun reset() {}
     
     enum class State {

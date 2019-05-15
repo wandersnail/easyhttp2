@@ -5,7 +5,7 @@ import android.os.Environment
 import com.snail.commons.utils.ToastUtils
 import com.snail.network.NetworkRequester
 import com.snail.network.TaskInfo
-import com.snail.network.callback.TaskListener
+import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadWorker
 import kotlinx.android.synthetic.main.activity_single_download.*
 import java.io.File
@@ -25,7 +25,7 @@ class SingleDownloadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_download)
         btnDownload.setOnClickListener { 
-            worker = NetworkRequester.download(info, object : TaskListener<DownInfo> {
+            worker = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
                 override fun onStateChange(info: DownInfo, t: Throwable?) {
                     t?.printStackTrace()
                     val log = when (info.state) {

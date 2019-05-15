@@ -1,15 +1,13 @@
 package com.snail.network.download
 
 import com.snail.network.TaskInfo
-import com.snail.network.TaskWorker
-import com.snail.network.callback.MultiTaskListener
-import com.snail.network.callback.TaskListener
 import com.snail.network.exception.RetryWhenException
 import com.snail.network.interceptor.ProgressInterceptor
 import com.snail.network.utils.HttpUtils
 import com.snail.network.utils.IOUtils
 import com.snail.network.utils.SchedulerUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Retrofit
@@ -17,6 +15,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 下载任务
@@ -24,13 +23,31 @@ import java.nio.channels.FileChannel
  * date: 2019/2/23 18:13
  * author: zengfansheng
  */
-class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
+class DownloadWorker<T : DownloadInfo> : Disposable {
+    private val taskMap = ConcurrentHashMap<T, DownloadObserver<T>>()
+    private val listener: DownloadListener<T>?
+    private val totalTasks: Int
+    private var successCount = 0
+    private var failedCount = 0
+    private var isCanceled = false
     
-    internal constructor(info: T, listener: TaskListener<T>?) : super(info, listener)
+    internal constructor(info: T, listener: DownloadListener<T>?) {
+        this.listener = listener
+        totalTasks = 1
+        info.reset()
+        this.execute(info)
+    }
     
-    internal constructor(infos: List<T>, listener: MultiTaskListener<T>?) : super(infos, listener)
+    internal constructor(infos: List<T>, listener: MultiDownloadListener<T>?) {
+        this.listener = listener
+        totalTasks = infos.size
+        infos.forEach {
+            it.reset()
+            this.execute(it)
+        }
+    }
 
-    override fun execute(info: T) {
+    private fun execute(info: T) {
         //如果listener为空，说明不需要监听，不为空则在本地监听后，再传出去
         val observer = DownloadObserver(info, if (listener == null) null else LocalTaskListener())
         taskMap[info] = observer
@@ -95,6 +112,72 @@ class DownloadWorker<T : DownloadInfo> : TaskWorker<T, T> {
                 execute(info)
             }
         }
+    }
+
+    private inner class LocalTaskListener : DownloadListener<T> {
+        override fun onStateChange(info: T, t: Throwable?) {
+            listener?.onStateChange(info, t)
+            if (totalTasks > 1) {
+                if (info.state == TaskInfo.State.COMPLETED) {
+                    taskMap.remove(info)
+                    successCount++
+                    (listener as? MultiDownloadListener)?.onTotalProgress(successCount, failedCount, totalTasks)
+                } else if (info.state == TaskInfo.State.CANCEL || info.state == TaskInfo.State.ERROR) {
+                    taskMap.remove(info)
+                    failedCount++
+                    (listener as? MultiDownloadListener)?.onTotalProgress(successCount, failedCount, totalTasks)
+                } else if (info.state == TaskInfo.State.START) {
+                    (listener as? MultiDownloadListener)?.onTotalProgress(successCount, failedCount, totalTasks)
+                }
+            }
+        }
+
+        override fun onProgress(info: T) {
+            listener?.onProgress(info)
+        }
+    }
+
+    /**
+     * 任务是否正在进行
+     */
+    fun isOngoing(): Boolean {
+        return remaining() > 0
+    }
+
+    /**
+     * 进行中的下载任务数
+     */
+    fun remaining(): Int {
+        return taskMap.size
+    }
+
+    /**
+     * 取消所有下载
+     */
+    @Synchronized
+    fun cancel() {
+        taskMap.values.forEach { it.dispose(true) }
+        taskMap.clear()
+        isCanceled = true
+    }
+
+    /**
+     * 取消单个下载
+     */
+    @Synchronized
+    fun cancel(info: T) {
+        taskMap.remove(info)?.dispose(true)
+        if (taskMap.isEmpty()) {
+            isCanceled = true
+        }
+    }
+
+    override fun isDisposed(): Boolean {
+        return isCanceled
+    }
+
+    override fun dispose() {
+        cancel()
     }
 
     //写入文件在本地

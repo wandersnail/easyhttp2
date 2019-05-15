@@ -16,7 +16,12 @@ open class DownloadInfo @JvmOverloads constructor(
     val savePath: String,
     /** 唯一标识 */
     tag: String = UUID.randomUUID().toString()) : TaskInfo(url, tag) {
-
+    /** 进度：总长度 */
+    var contentLength: Long = 0
+        internal set
+    /** 进度：已完成长度 */
+    var completionLength: Long = 0
+        internal set
     /**
      * 获取下载的临时文件，下载完成后再重命名
      */

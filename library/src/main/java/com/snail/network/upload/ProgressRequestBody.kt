@@ -1,6 +1,5 @@
 package com.snail.network.upload
 
-import com.snail.network.callback.ProgressListener
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.internal.Util
@@ -16,7 +15,7 @@ import java.io.InputStream
  * date: 2019/2/28 12:25
  * author: zengfansheng
  */
-internal class ProgressRequestBody(private val contentType: MediaType?, private val file: File, private val listener: ProgressListener?) : RequestBody() {
+internal class ProgressRequestBody(private val contentType: MediaType?, private val name: String, private val file: File, private val listener: UploadProgressListener?) : RequestBody() {
     override fun contentType(): MediaType? {
         return contentType
     }
@@ -36,7 +35,7 @@ internal class ProgressRequestBody(private val contentType: MediaType?, private 
             while (len != -1) {
                 sink.write(buffer, 0, len)
                 uploaded += len
-                listener?.onProgress(uploaded, contentLength())
+                listener?.onProgress(name, uploaded, contentLength())
                 len = inputStream.read(buffer)
             }
         } finally {

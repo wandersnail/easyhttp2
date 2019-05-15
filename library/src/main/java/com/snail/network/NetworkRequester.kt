@@ -1,13 +1,14 @@
 package com.snail.network
 
-import com.snail.network.callback.MultiTaskListener
 import com.snail.network.callback.RequestCallback
-import com.snail.network.callback.TaskListener
 import com.snail.network.converter.OriginalResponseConverter
 import com.snail.network.converter.ResponseConverter
 import com.snail.network.download.DownloadInfo
+import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadWorker
+import com.snail.network.download.MultiDownloadListener
 import com.snail.network.upload.UploadInfo
+import com.snail.network.upload.UploadListener
 import com.snail.network.upload.UploadWorker
 import com.snail.network.utils.HttpUtils
 import io.reactivex.Observable
@@ -53,7 +54,7 @@ object NetworkRequester {
      * @param listener 下载监听
      */
     @JvmStatic
-    fun <T : DownloadInfo> download(info: T, listener: TaskListener<T>?): DownloadWorker<T> {
+    fun <T : DownloadInfo> download(info: T, listener: DownloadListener<T>?): DownloadWorker<T> {
         return DownloadWorker(info, listener)
     }
 
@@ -64,24 +65,17 @@ object NetworkRequester {
      * @param listener 下载监听
      */
     @JvmStatic
-    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiTaskListener<T>?): DownloadWorker<T> {
+    fun <T : DownloadInfo> download(infos: List<T>, listener: MultiDownloadListener<T>?): DownloadWorker<T> {
         return DownloadWorker(infos, listener)
     }
 
     /**
-     * 上传单个文件
+     * 上传
      */
     @JvmStatic
-    fun <R, T : UploadInfo<R>> upload(info: T, listener: TaskListener<T>?): UploadWorker<R, T> {
+    @JvmOverloads
+    fun <T> upload(info: UploadInfo<T>, listener: UploadListener? = null): UploadWorker<T> {
         return UploadWorker(info, listener)
-    }
-
-    /**
-     * 批量上传
-     */
-    @JvmStatic
-    fun <R, T : UploadInfo<R>> upload(infos: List<T>, listener: MultiTaskListener<T>?): UploadWorker<R, T> {
-        return UploadWorker(infos, listener)
     }
 
     private fun <T> subscribe(observable: Observable<Response<ResponseBody>>, converter: ResponseConverter<T>, configuration: Configuration, callback: RequestCallback<T>?): Disposable {
