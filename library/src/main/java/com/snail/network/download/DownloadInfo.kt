@@ -9,7 +9,6 @@ import java.util.*
  * 作者: zengfansheng
  * 功能: 下载信息类，包含下载状态及进度监听
  */
-
 open class DownloadInfo @JvmOverloads constructor(
     url: String,
     /** 文件保存路径 */

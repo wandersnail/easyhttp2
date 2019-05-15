@@ -18,7 +18,6 @@ import java.io.File
  * 时间: 2017/7/8 02:33
  * 作者: zengfansheng
  */
-
 internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(private val info: T, private val listener: DownloadListener<T>? = null) : 
     Observer<Response<ResponseBody>>, ProgressListener {
     private var disposable: Disposable? = null
