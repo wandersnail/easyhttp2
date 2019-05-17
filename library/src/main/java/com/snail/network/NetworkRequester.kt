@@ -7,9 +7,7 @@ import com.snail.network.download.DownloadInfo
 import com.snail.network.download.DownloadListener
 import com.snail.network.download.DownloadWorker
 import com.snail.network.download.MultiDownloadListener
-import com.snail.network.upload.UploadInfo
-import com.snail.network.upload.UploadListener
-import com.snail.network.upload.UploadWorker
+import com.snail.network.upload.*
 import com.snail.network.utils.HttpUtils
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -17,9 +15,11 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit
  * author: zengfansheng
  */
 object NetworkRequester {
+    val executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+    
     private fun getConfiguration(baseUrl: String, configuration: Configuration?): Configuration {
         val url = HttpUtils.getBaseUrl(baseUrl)
         val config = configuration ?: Configuration()
@@ -70,20 +72,33 @@ object NetworkRequester {
     }
 
     /**
-     * 上传
+     * 上传。异步的
      */
     @JvmStatic
     @JvmOverloads
-    fun <T> upload(info: UploadInfo<T>, listener: UploadListener? = null): UploadWorker<T> {
+    fun <T> upload(info: UploadInfo<T>, listener: UploadListener<T>? = null): UploadWorker<T> {
         return UploadWorker(info, listener)
+    }
+
+    /**
+     * 上传。同步的
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun <T> uploadSync(info: UploadInfo<T>, listener: UploadProgressListener? = null): ConvertedResponse<T> {
+        return SyncUploadWorker(info, listener).convertedResponse
     }
 
     private fun <T> subscribe(observable: Observable<Response<ResponseBody>>, converter: ResponseConverter<T>, configuration: Configuration, callback: RequestCallback<T>?): Disposable {
         return GeneralRequestTask(observable, converter, configuration, callback).disposable!!
     }
     
+    private fun <T> handleSyncResponse(call: Call<ResponseBody>, converter: ResponseConverter<T>, configuration: Configuration): ConvertedResponse<T> {
+        return SyncGeneralRequestTask(call, converter, configuration).convertedResponse
+    }
+
     /**
-     * 普通GET请求
+     * 普通GET请求。异步的
      */
     @JvmStatic
     fun get(url: String, callback: RequestCallback<ResponseBody>?): Disposable {
@@ -92,7 +107,16 @@ object NetworkRequester {
     }
 
     /**
-     * 普通GET请求
+     * 普通GET请求。同步的
+     */
+    @JvmStatic
+    fun get(url: String): ConvertedResponse<ResponseBody> {
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.getSync(url), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * 普通GET请求。异步的
      */
     @JvmStatic
     fun get(configuration: Configuration, url: String, callback: RequestCallback<ResponseBody>?): Disposable {
@@ -101,7 +125,16 @@ object NetworkRequester {
     }
 
     /**
-     * 普通GET请求
+     * 普通GET请求。同步的
+     */
+    @JvmStatic
+    fun get(configuration: Configuration, url: String): ConvertedResponse<ResponseBody> {
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.getSync(url), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * 普通GET请求。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -113,7 +146,19 @@ object NetworkRequester {
     }
 
     /**
-     * 普通GET请求
+     * 普通GET请求。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> get(url: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.getSync(url), converter, config)
+    }
+
+    /**
+     * 普通GET请求。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -125,7 +170,19 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是json
+     * 普通GET请求。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> get(configuration: Configuration, url: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.getSync(url), converter, config)
+    }
+
+    /**
+     * POST请求，body是json。异步的
      *
      * @param url 请求的url
      */
@@ -137,7 +194,19 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是json
+     * POST请求，body是json。同步的
+     *
+     * @param url 请求的url
+     */
+    @JvmStatic
+    fun postJson(url: String, json: String): ConvertedResponse<ResponseBody> {
+        val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postJsonSync(url, requestBody), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST请求，body是json。异步的
      *
      * @param url 请求的url
      */
@@ -149,7 +218,19 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是json
+     * POST请求，body是json。同步的
+     *
+     * @param url 请求的url
+     */
+    @JvmStatic
+    fun postJson(configuration: Configuration, url: String, json: String): ConvertedResponse<ResponseBody> {
+        val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postJsonSync(url, requestBody), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST请求，body是json。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -158,12 +239,24 @@ object NetworkRequester {
     fun <T> postJson(url: String, json: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, null)
-        val observable = config.service!!.postJson(url, requestBody)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.postJson(url, requestBody), converter, config, callback)
     }
 
     /**
-     * POST请求，body是json
+     * POST请求，body是json。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postJson(url: String, json: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postJsonSync(url, requestBody), converter, config)
+    }
+
+    /**
+     * POST请求，body是json。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -172,12 +265,24 @@ object NetworkRequester {
     fun <T> postJson(configuration: Configuration, url: String, json: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
         val config = getConfiguration(url, configuration)
-        val observable = config.service!!.postJson(url, requestBody)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.postJson(url, requestBody), converter, config, callback)
     }
 
     /**
-     * POST请求，body是字符串
+     * POST请求，body是json。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postJson(configuration: Configuration, url: String, json: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json)
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postJsonSync(url, requestBody), converter, config)
+    }
+
+    /**
+     * POST请求，body是字符串。异步的
      */
     @JvmStatic
     fun postText(url: String, text: String, callback: RequestCallback<ResponseBody>?): Disposable {
@@ -187,7 +292,17 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是字符串
+     * POST请求，body是字符串。同步的
+     */
+    @JvmStatic
+    fun postText(url: String, text: String): ConvertedResponse<ResponseBody> {
+        val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postSync(url, requestBody), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST请求，body是字符串。异步的
      */
     @JvmStatic
     fun postText(configuration: Configuration, url: String, text: String, callback: RequestCallback<ResponseBody>?): Disposable {
@@ -197,7 +312,17 @@ object NetworkRequester {
     }
 
     /**
-     * POST请求，body是字符串
+     * POST请求，body是字符串。同步的
+     */
+    @JvmStatic
+    fun postText(configuration: Configuration, url: String, text: String): ConvertedResponse<ResponseBody> {
+        val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postSync(url, requestBody), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST请求，body是字符串。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -206,12 +331,24 @@ object NetworkRequester {
     fun <T> postText(url: String, text: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, null)
-        val observable = config.service!!.post(url, requestBody)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.post(url, requestBody), converter, config, callback)
     }
 
     /**
-     * POST请求，body是字符串
+     * POST请求，body是字符串。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postText(url: String, text: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postSync(url, requestBody), converter, config)
+    }
+
+    /**
+     * POST请求，body是字符串。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -220,12 +357,24 @@ object NetworkRequester {
     fun <T> postText(configuration: Configuration, url: String, text: String, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
         val config = getConfiguration(url, configuration)
-        val observable = config.service!!.post(url, requestBody)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.post(url, requestBody), converter, config, callback)
     }
 
     /**
-     * POST提交表单
+     * POST请求，body是字符串。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postText(configuration: Configuration, url: String, text: String, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text)
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postSync(url, requestBody), converter, config)
+    }
+
+    /**
+     * POST提交表单。异步的
      *
      * @param map 参数集合
      */
@@ -236,7 +385,18 @@ object NetworkRequester {
     }
 
     /**
-     * POST提交表单
+     * POST提交表单。同步的
+     *
+     * @param map 参数集合
+     */
+    @JvmStatic
+    fun postForm(url: String, map: Map<String, Any>): ConvertedResponse<ResponseBody> {
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postFormSync(url, map), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST提交表单。异步的
      *
      * @param map 参数集合
      */
@@ -247,7 +407,18 @@ object NetworkRequester {
     }
 
     /**
-     * POST提交表单
+     * POST提交表单。同步的
+     *
+     * @param map 参数集合
+     */
+    @JvmStatic
+    fun postForm(configuration: Configuration, url: String, map: Map<String, Any>): ConvertedResponse<ResponseBody> {
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postFormSync(url, map), OriginalResponseConverter(), config)
+    }
+
+    /**
+     * POST提交表单。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -255,12 +426,23 @@ object NetworkRequester {
     @JvmStatic
     fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, null)
-        val observable = config.service!!.postForm(url, map)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.postForm(url, map), converter, config, callback)
     }
 
     /**
-     * POST提交表单
+     * POST提交表单。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postForm(url: String, map: Map<String, Any>, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val config = getConfiguration(url, null)
+        return handleSyncResponse(config.service!!.postFormSync(url, map), converter, config)
+    }
+
+    /**
+     * POST提交表单。异步的
      *
      * @param converter 响应体转换器
      * @param T 转到成的对象类
@@ -268,7 +450,18 @@ object NetworkRequester {
     @JvmStatic
     fun <T> postForm(configuration: Configuration, url: String, map: Map<String, Any>, converter: ResponseConverter<T>, callback: RequestCallback<T>?): Disposable {
         val config = getConfiguration(url, configuration)
-        val observable = config.service!!.postForm(url, map)
-        return subscribe(observable, converter, config, callback)
+        return subscribe(config.service!!.postForm(url, map), converter, config, callback)
+    }
+
+    /**
+     * POST提交表单。同步的
+     *
+     * @param converter 响应体转换器
+     * @param T 转到成的对象类
+     */
+    @JvmStatic
+    fun <T> postForm(configuration: Configuration, url: String, map: Map<String, Any>, converter: ResponseConverter<T>): ConvertedResponse<T> {
+        val config = getConfiguration(url, configuration)
+        return handleSyncResponse(config.service!!.postFormSync(url, map), converter, config)
     }
 }

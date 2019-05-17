@@ -11,6 +11,7 @@ import com.snail.network.upload.UploadInfo
 import com.snail.network.upload.UploadListener
 import com.snail.network.upload.UploadWorker
 import kotlinx.android.synthetic.main.activity_single_upload.*
+import okhttp3.Response
 import java.io.File
 
 /**
@@ -47,7 +48,11 @@ class SingleUploadActivity : BaseActivity() {
                 val url = "https://www.blindx.cn/smart/customer/log"
                 val converter = JsonResponseConverter(BaseResp::class.java)
                 val info = UploadInfo(url, converter, args, files)
-                worker = NetworkRequester.upload(info, object : UploadListener {
+                worker = NetworkRequester.upload(info, object : UploadListener<BaseResp> {
+                    override fun onResponseBodyParse(response: Response, convertedBody: BaseResp?) {
+                        tvResponse.text = response.toString()
+                    }
+
                     override fun onStateChange(state: TaskInfo.State, t: Throwable?) {
                         t?.printStackTrace()
                         val log = when (state) {
@@ -55,7 +60,6 @@ class SingleUploadActivity : BaseActivity() {
                             TaskInfo.State.START -> "开始上传"
                             TaskInfo.State.ERROR -> "上传错误, ${t?.message}"
                             TaskInfo.State.COMPLETED -> {
-                                tvResponse.text = info.response?.toString()
                                 "上传成功"
                             }
                             TaskInfo.State.CANCEL -> "上传取消"

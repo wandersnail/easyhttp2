@@ -3,6 +3,7 @@ package com.snail.network
 import io.reactivex.Observable
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -26,4 +27,18 @@ internal interface HttpService {
 
     @POST
     fun post(@Url url: String, @Body body: RequestBody): Observable<Response<ResponseBody>>
+
+    @GET
+    fun getSync(@Url url: String): Call<ResponseBody>
+
+    @POST
+    @FormUrlEncoded
+    fun postFormSync(@Url url: String, @FieldMap map: Map<String, @JvmSuppressWildcards Any>): Call<ResponseBody>
+
+    @POST
+    @Headers("Content-Type:application/json;charset=utf-8", "Accept:application/json;")
+    fun postJsonSync(@Url url: String, @Body body: RequestBody): Call<ResponseBody>
+
+    @POST
+    fun postSync(@Url url: String, @Body body: RequestBody): Call<ResponseBody>
 }

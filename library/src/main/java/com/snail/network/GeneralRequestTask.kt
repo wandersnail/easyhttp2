@@ -18,10 +18,9 @@ import java.util.concurrent.TimeoutException
  * author: zengfansheng
  */
 internal class GeneralRequestTask<T>(observable: Observable<Response<ResponseBody>>, converter: ResponseConverter<T>, private val configuration: Configuration, private val callback: RequestCallback<T>?) {
-    var disposable: Disposable? = null
+    var disposable: Disposable?
         private set
-    private var handler: Handler? = null
-    private var secondCount = 0
+    private var handler: Handler? = null    
     private var timerRunnable: Runnable? = null
     
     init {
@@ -48,6 +47,7 @@ internal class GeneralRequestTask<T>(observable: Observable<Response<ResponseBod
     }
     
     private inner class TimerRunnable : Runnable {
+        private var secondCount = 0
         override fun run() {
             if (disposable != null && ++secondCount < configuration.callTimeout) {
                 handler?.postDelayed(this, 1000)

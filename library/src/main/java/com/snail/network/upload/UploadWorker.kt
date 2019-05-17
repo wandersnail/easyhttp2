@@ -17,7 +17,7 @@ import java.net.URLEncoder
  * date: 2019/2/28 18:21
  * author: zengfansheng
  */
-class UploadWorker<T> @JvmOverloads constructor(info: UploadInfo<T>, listener: UploadListener? = null) : Disposable {
+class UploadWorker<T> @JvmOverloads internal constructor(info: UploadInfo<T>, listener: UploadListener<T>? = null) : Disposable {
     private val observer = UploadObserver(info, listener)
     
     init {

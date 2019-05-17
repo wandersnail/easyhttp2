@@ -15,7 +15,7 @@ import retrofit2.Response
  * @property T 响应数据类型 
  */
 internal class UploadObserver<T> 
-@JvmOverloads constructor(private val info: UploadInfo<T>, private val listener: UploadListener? = null) : 
+@JvmOverloads constructor(private val info: UploadInfo<T>, private val listener: UploadListener<T>? = null) : 
     Observer<Response<ResponseBody>>, Disposable, UploadProgressListener {
     private var disposable: Disposable? = null
     private var lastUpdateTime: Long = 0//上次进度更新时间
@@ -33,9 +33,9 @@ internal class UploadObserver<T>
     }
 
     override fun onNext(t: Response<ResponseBody>) {
-        info.response = t.raw()
         try {
-            info.convertedBody = info.converter.convert(t.body())
+            val convertedBody = info.converter.convert(t.body())
+            listener?.onResponseBodyParse(t.raw(), convertedBody)
         } catch (e: Exception) {
             onError(e)
         }
