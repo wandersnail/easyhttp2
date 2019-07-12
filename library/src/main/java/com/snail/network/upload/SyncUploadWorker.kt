@@ -3,7 +3,6 @@ package com.snail.network.upload
 import com.snail.network.ConvertedResponse
 import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.net.URLEncoder
@@ -35,14 +34,16 @@ internal class SyncUploadWorker<T> @JvmOverloads constructor(info: UploadInfo<T>
             .baseUrl(info.baseUrl)
             .build()
             .create(UploadService::class.java)
-        val parts = HashMap<String, @JvmSuppressWildcards RequestBody>()
-        info.paramParts.entries.forEach { parts[it.key] = RequestBody.create(null, it.value) }
-        info.fileParts.entries.forEach {
-            MultipartBody.Part.createFormData(it.key, URLEncoder.encode(it.value.name, "utf-8"),
-                ProgressRequestBody(MediaType.parse("multipart/form-data"), it.key, it.value, localListener)
-            )
+        val bodyBuilder = MultipartBody.Builder()
+        info.paramParts.entries.forEach {
+            bodyBuilder.addFormDataPart(it.key, it.value)
         }
-        val call = service.uploadSync(info.url, parts)
+        info.fileParts.entries.forEach {
+            val part = MultipartBody.Part.createFormData(it.key, URLEncoder.encode(it.value.name, "utf-8"),
+                ProgressRequestBody(MediaType.parse("multipart/form-data"), it.key, it.value, localListener))
+            bodyBuilder.addPart(part)
+        }
+        val call = service.uploadSync(info.url, bodyBuilder.build())
         convertedResponse = ConvertedResponse(call)
         try {
             val response = call.execute()
