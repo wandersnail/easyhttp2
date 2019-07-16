@@ -30,6 +30,7 @@ internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(priv
     }
 
     override fun onError(e: Throwable) {
+        disposable = null
         info.state = TaskInfo.State.ERROR
         listener?.onStateChange(info, e)
     }
@@ -63,7 +64,9 @@ internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(priv
 
     fun dispose(cancel: Boolean) {
         AndroidSchedulers.mainThread().scheduleDirect {
-            disposable?.dispose()
+            if (disposable != null && !disposable!!.isDisposed) {
+                disposable?.dispose()
+            }
             if (info.state == TaskInfo.State.ONGOING || info.state == TaskInfo.State.START) {
                 if (cancel) {
                     info.state = TaskInfo.State.CANCEL
@@ -82,6 +85,7 @@ internal class DownloadObserver<T : DownloadInfo> @JvmOverloads constructor(priv
 
     @SuppressLint("CheckResult")
     override fun onComplete() {
+        disposable = null
         Schedulers.io().scheduleDirect {
             //将临时文件重命名为目标路径
             val destFile = File(info.savePath)

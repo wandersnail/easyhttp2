@@ -11,6 +11,9 @@ import com.snail.network.upload.*
 import com.snail.network.utils.HttpUtils
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.exceptions.UndeliverableException
+import io.reactivex.functions.Consumer
+import io.reactivex.plugins.RxJavaPlugins
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -19,6 +22,8 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import java.io.IOException
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -30,7 +35,36 @@ import java.util.concurrent.TimeUnit
  * author: zengfansheng
  */
 object NetworkRequester {
-    val executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+    val executor: ExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+    
+    init {
+        RxJavaPlugins.setErrorHandler(object : Consumer<Throwable> {
+            override fun accept(e: Throwable) {
+                var t = e
+                if (t is UndeliverableException) {
+                    t = t.cause ?: Throwable(e)
+                }
+                if (t is IOException) {
+                    // fine, irrelevant network problem or API that throws on cancellation
+                    return
+                }
+                if (t is InterruptedException) {
+                    // fine, some blocking code was interrupted by a dispose call
+                    return
+                }
+                if (t is NullPointerException || t is IllegalArgumentException) {
+                    // that's likely a bug in the application
+                    Thread.currentThread().uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t)
+                    return
+                }
+                if (t is IllegalStateException) {
+                    // that's a bug in RxJava or in a custom operator
+                    Thread.currentThread().uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t)
+                    return
+                }
+            }
+        })
+    }
     
     private fun getConfiguration(baseUrl: String, configuration: Configuration?): Configuration {
         val url = HttpUtils.getBaseUrl(baseUrl)

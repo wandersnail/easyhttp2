@@ -28,6 +28,7 @@ internal class UploadObserver<T>
     }
 
     override fun onError(e: Throwable) {
+        disposable = null
         info.state = TaskInfo.State.ERROR
         listener?.onStateChange(info.state, e)
     }
@@ -64,6 +65,7 @@ internal class UploadObserver<T>
     }
     
     override fun onComplete() {
+        disposable = null
         contentLengthMap.entries.forEach { 
             listener?.onProgress(it.key, it.value, it.value)
         }
@@ -77,7 +79,9 @@ internal class UploadObserver<T>
 
     override fun dispose() {
         AndroidSchedulers.mainThread().scheduleDirect {
-            disposable?.dispose()
+            if (!isDisposed) {
+                disposable?.dispose()
+            }
             if (info.state == TaskInfo.State.ONGOING || info.state == TaskInfo.State.START) {
                 info.state = TaskInfo.State.CANCEL
                 listener?.onStateChange(info.state, null)

@@ -43,7 +43,7 @@ internal class GeneralRequestTask<T>(observable: Observable<Response<ResponseBod
         }, {
             disposable = null
             handler?.removeCallbacks(timerRunnable)
-        })        
+        })
     }
     
     private inner class TimerRunnable : Runnable {
@@ -52,7 +52,9 @@ internal class GeneralRequestTask<T>(observable: Observable<Response<ResponseBod
             if (disposable != null && ++secondCount < configuration.callTimeout) {
                 handler?.postDelayed(this, 1000)
             } else {
-                disposable?.dispose()
+                if (disposable != null && !disposable!!.isDisposed) {
+                    disposable?.dispose()
+                }
                 disposable = null
                 callback?.onError(TimeoutException("Http请求超时！"))
             }

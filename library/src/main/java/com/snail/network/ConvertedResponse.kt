@@ -34,6 +34,8 @@ class ConvertedResponse<T> internal constructor(private val call: Call<ResponseB
      * 取消
      */
     fun cancel() {
-        call.cancel()
+        if (call.isExecuted && !call.isCanceled) {
+            call.cancel()
+        }
     }
 }
