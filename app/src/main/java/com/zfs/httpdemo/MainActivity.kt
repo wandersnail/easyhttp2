@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.snail.commons.entity.PermissionsRequester
-import com.snail.commons.utils.ToastUtils
-import com.snail.widget.listview.BaseListAdapter
-import com.snail.widget.listview.BaseViewHolder
+import cn.wandersnail.commons.helper.PermissionsRequester
+import cn.wandersnail.commons.util.ToastUtils
+import cn.wandersnail.widget.listview.BaseListAdapter
+import cn.wandersnail.widget.listview.BaseViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 SingleUploadActivity::class.java)
         lv.adapter = object : BaseListAdapter<String>(this, data) {
             override fun createViewHolder(position: Int): BaseViewHolder<String> {
-                return object : BaseViewHolder<String>() {
+                return object : BaseViewHolder<String> {
                     private var tv: TextView? = null
 
                     override fun onBind(item: String, position: Int) {
@@ -48,13 +48,11 @@ class MainActivity : AppCompatActivity() {
         val list = ArrayList<String>()
         list.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         requester?.checkAndRequest(list)
-        requester?.setOnRequestResultListener(object : PermissionsRequester.OnRequestResultListener {
-            override fun onRequestResult(refusedPermissions: MutableList<String>) {
-                if (refusedPermissions.isNotEmpty()) {
-                    ToastUtils.showShort("部分权限被拒绝，可能造成某些功能无法使用")
-                }
+        requester?.setCallback { refusedPermissions ->
+            if (refusedPermissions.isNotEmpty()) {
+                ToastUtils.showShort("部分权限被拒绝，可能造成某些功能无法使用")
             }
-        })
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -2,14 +2,14 @@ package com.zfs.httpdemo
 
 import android.content.Intent
 import android.os.Bundle
-import com.snail.fileselector.FileSelector
-import com.snail.fileselector.OnFileSelectListener
-import com.snail.network.NetworkRequester
-import com.snail.network.TaskInfo
-import com.snail.network.converter.JsonResponseConverter
-import com.snail.network.upload.UploadInfo
-import com.snail.network.upload.UploadListener
-import com.snail.network.upload.UploadWorker
+import cn.wandersnail.fileselector.FileSelector
+import cn.wandersnail.fileselector.OnFileSelectListener
+import cn.wandersnail.http.EasyHttp
+import cn.wandersnail.http.TaskInfo
+import cn.wandersnail.http.converter.JsonResponseConverter
+import cn.wandersnail.http.upload.UploadInfo
+import cn.wandersnail.http.upload.UploadListener
+import cn.wandersnail.http.upload.UploadWorker
 import kotlinx.android.synthetic.main.activity_single_upload.*
 import okhttp3.Response
 import java.io.File
@@ -46,9 +46,10 @@ class SingleUploadActivity : BaseActivity() {
                 val files = HashMap<String, File>()
                 files["file"] = File(path)
                 val url = "https://www.blindx.cn/smart/customer/log"
-                val converter = JsonResponseConverter(BaseResp::class.java)
-                val info = UploadInfo(url, converter, args, files)
-                worker = NetworkRequester.upload(info, object : UploadListener<BaseResp> {
+                val info = UploadInfo<BaseResp>(url, files)
+                info.setParamParts(args)
+                info.setConverter(JsonResponseConverter(BaseResp::class.java))
+                worker = EasyHttp.upload(info, object : UploadListener<BaseResp> {
                     override fun onResponseBodyParse(response: Response, convertedBody: BaseResp?) {
                         tvResponse.text = response.toString()
                     }

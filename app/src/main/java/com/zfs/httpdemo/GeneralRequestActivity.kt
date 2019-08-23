@@ -2,11 +2,11 @@ package com.zfs.httpdemo
 
 import android.os.Bundle
 import android.util.Log
-import com.snail.network.Configuration
-import com.snail.network.NetworkRequester
-import com.snail.network.callback.RequestCallback
-import com.snail.network.converter.JsonResponseConverter
-import com.snail.network.converter.StringResponseConverter
+import cn.wandersnail.http.Configuration
+import cn.wandersnail.http.EasyHttp
+import cn.wandersnail.http.callback.RequestCallback
+import cn.wandersnail.http.converter.JsonResponseConverter
+import cn.wandersnail.http.converter.StringResponseConverter
 import kotlinx.android.synthetic.main.activity_general_request.*
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -24,7 +24,7 @@ class GeneralRequestActivity : BaseActivity() {
         btnGet.setOnClickListener { 
             val config = Configuration()
             config.callTimeout = 4
-            NetworkRequester.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : RequestCallback<ResponseBody> {
+            EasyHttp.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : RequestCallback<ResponseBody> {
                 override fun onSuccess(response: Response, convertedBody: ResponseBody?) {
                     val resp = convertedBody?.string()
                     Log.e("get", "onNext: $resp")
@@ -37,7 +37,7 @@ class GeneralRequestActivity : BaseActivity() {
             })
         }
         btnPostText.setOnClickListener {
-            NetworkRequester.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
+            EasyHttp.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
                 override fun onSuccess(response: Response, convertedBody: String?) {
                     tvResp.text = convertedBody
                 }
@@ -48,7 +48,7 @@ class GeneralRequestActivity : BaseActivity() {
             })          
         }
         btnPostJson.setOnClickListener {
-            NetworkRequester.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
+            EasyHttp.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
 
                 override fun onSuccess(response: Response, convertedBody: String?) {
                     tvResp.text = convertedBody
@@ -63,7 +63,8 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, Any>()
             map["postForm"] = "laomao"
             map["password"] = 123456
-            NetworkRequester.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object : RequestCallback<BaseResp> {
+            EasyHttp.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object :
+                RequestCallback<BaseResp> {
 
                 override fun onSuccess(response: Response, convertedBody: BaseResp?) {
                     Log.e("postForm", "onNext: code = ${convertedBody?.code}, msg = ${convertedBody?.msg}")

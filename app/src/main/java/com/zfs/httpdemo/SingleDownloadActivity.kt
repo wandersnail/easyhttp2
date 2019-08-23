@@ -2,11 +2,11 @@ package com.zfs.httpdemo
 
 import android.os.Bundle
 import android.os.Environment
-import com.snail.commons.utils.ToastUtils
-import com.snail.network.NetworkRequester
-import com.snail.network.TaskInfo
-import com.snail.network.download.DownloadListener
-import com.snail.network.download.DownloadWorker
+import cn.wandersnail.commons.util.ToastUtils
+import cn.wandersnail.http.EasyHttp
+import cn.wandersnail.http.TaskInfo
+import cn.wandersnail.http.download.DownloadListener
+import cn.wandersnail.http.download.DownloadWorker
 import kotlinx.android.synthetic.main.activity_single_download.*
 import java.io.File
 
@@ -25,7 +25,7 @@ class SingleDownloadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_download)
         btnDownload.setOnClickListener { 
-            worker = NetworkRequester.download(info, object : DownloadListener<DownInfo> {
+            worker = EasyHttp.download(info, object : DownloadListener<DownInfo> {
                 override fun onStateChange(info: DownInfo, t: Throwable?) {
                     t?.printStackTrace()
                     val log = when (info.state) {

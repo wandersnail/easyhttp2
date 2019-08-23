@@ -1,6 +1,6 @@
 package com.zfs.httpdemo
 
-import com.snail.network.download.DownloadInfo
+import cn.wandersnail.http.download.DownloadInfo
 import java.util.*
 
 /**

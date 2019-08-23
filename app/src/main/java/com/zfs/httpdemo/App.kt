@@ -2,8 +2,8 @@ package com.zfs.httpdemo
 
 import android.app.Application
 import android.os.Environment
-import com.snail.commons.AppHolder
-import com.snail.commons.entity.CrashHandler
+import cn.wandersnail.commons.base.AppHolder
+import cn.wandersnail.commons.helper.CrashHandler
 import java.io.File
 
 /**
@@ -14,7 +14,7 @@ import java.io.File
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        AppHolder.init(this)
-        CrashHandler.instance.init(this, File(Environment.getExternalStorageDirectory(), "network-requester/crash.txt"), null)
+        AppHolder.initialize(this)
+        CrashHandler(this, File(Environment.getExternalStorageDirectory(), "network-requester/crash.txt"), null)
     }
 }

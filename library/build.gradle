@@ -1,11 +1,15 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven'
 
-def lib_version = '1.3.2'
-group = "com.github.wandersnail"
+def lib_version = '1.0.0'
+def user_name = 'wandersnail'
+def lib_group = 'cn.wandersnail'
+def lib_artifact = 'easyhttp'
+def lib_packaging = 'aar'
+def lib_description = 'http lib for Android'
+def lib_website = 'https://github.com/wandersnail/easyhttp'
+group = lib_group
 version = lib_version
 
 android {
@@ -26,11 +30,14 @@ android {
     lintOptions {
         abortOnError false
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     compileOnly "androidx.appcompat:appcompat:$appcompat_version"
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compileOnly "com.squareup.retrofit2:retrofit:$retrofit2_version"
     compileOnly "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
     compileOnly "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
@@ -38,14 +45,40 @@ dependencies {
     compileOnly "com.alibaba:fastjson:$fastjson_version"
 }
 
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+task classJar(type: Jar, dependsOn: ['assembleRelease', 'sourcesJar']) {
+    from(project.zipTree("${project.buildDir.absolutePath}/intermediates/packaged-classes/release/classes.jar"))
+    exclude '**/R.class', '**/R$*.class', '**/**/BuildConfig.class', '**/**/BuildConfig$*.class'
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+    archives classJar
+}
+
 publish {
-    repoName = "android"//仓库名
-    userOrg = 'wandersnail' //bintray.com用户名  
-    groupId = 'com.github.wandersnail' //jcenter上的路径  
-    artifactId = 'network-requester' //项目名称  
+    repoName="androidx"//仓库名
+    userOrg = user_name //bintray.com用户名  
+    groupId = lib_group //jcenter上的路径  
+    artifactId = lib_artifact //项目名称  
     publishVersion = lib_version //版本号  
-    desc = 'http网络请求'
-    website = 'https://github.com/wandersnail'
+    desc = lib_description
+    website = lib_website
 }
 
 if (project.getGradle().startParameter.taskNames.any { it.contains('bintrayUpload') }) {
@@ -58,17 +91,17 @@ if (project.getGradle().startParameter.taskNames.any { it.contains('bintrayUploa
             pom {
                 //noinspection GroovyAssignabilityCheck
                 project {
-                    name "network-requester"
-                    artifactId 'network-requester'
-                    packaging 'aar'
-                    description 'Android http网络请求'
-                    url 'https://github.com/wandersnail'
+                    name lib_artifact
+                    artifactId lib_artifact
+                    packaging lib_packaging
+                    description lib_description
                     version lib_version
+                    url lib_website
 
                     scm {
-                        url 'https://github.com/wandersnail/network-requester'
-                        connection 'scm:git:https://github.com/wandersnail/network-requester.git'
-                        developerConnection 'scm:git:https://github.com/wandersnail/network-requester.git'
+                        url lib_website
+                        connection "scm:git:${lib_website}.git"
+                        developerConnection "scm:git:${lib_website}.git"
                     }
 
                     licenses {
@@ -80,7 +113,7 @@ if (project.getGradle().startParameter.taskNames.any { it.contains('bintrayUploa
 
                     developers {
                         developer {
-                            id 'wandersnail'
+                            id user_name
                             name 'Zeng Fansheng'
                             email 'bingmo977@qq.com'
                         }
