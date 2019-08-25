@@ -39,6 +39,8 @@ class GeneralRequestTask<T> {
         }
         disposable = observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
                 .subscribe(response -> {
+                    disposable = null;
+                    handler.removeCallbacks(timerRunnable);
                     if (callback != null) {
                         try {
                             callback.onSuccess(response.raw(), converter.convert(response.body()));
@@ -52,9 +54,6 @@ class GeneralRequestTask<T> {
                     if (callback != null) {
                         callback.onError(throwable);
                     }
-                }, () -> {
-                    disposable = null;
-                    handler.removeCallbacks(timerRunnable);
                 });
     }
 
