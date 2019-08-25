@@ -54,6 +54,9 @@ class GeneralRequestTask<T> {
                     if (callback != null) {
                         callback.onError(throwable);
                     }
+                }, () -> {
+                    disposable = null;
+                    handler.removeCallbacks(timerRunnable);
                 });
     }
 
