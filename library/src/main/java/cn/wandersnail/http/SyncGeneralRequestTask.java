@@ -28,9 +28,9 @@ class SyncGeneralRequestTask<T> {
                     if (complete) {
                         return;
                     }
-                    //如果到了这里，说明超时了，取消请求
-                    call.cancel();
                 }
+                //如果到了这里，说明超时了，取消请求
+                call.cancel();
             });
         }
         try {
