@@ -39,8 +39,7 @@ class GeneralRequestTask<T> {
         }
         disposable = observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
                 .subscribe(response -> {
-                    disposable = null;
-                    handler.removeCallbacks(timerRunnable);
+                    handleRequestOver(timerRunnable);
                     if (callback != null) {
                         try {
                             callback.onSuccess(response.raw(), converter.convert(response.body()));
@@ -49,15 +48,19 @@ class GeneralRequestTask<T> {
                         }
                     }
                 }, throwable -> {
-                    disposable = null;
-                    handler.removeCallbacks(timerRunnable);
+                    handleRequestOver(timerRunnable);
                     if (callback != null) {
                         callback.onError(throwable);
                     }
-                }, () -> {
-                    disposable = null;
-                    handler.removeCallbacks(timerRunnable);
-                });
+                }, () -> handleRequestOver(timerRunnable));
+    }
+    
+    //处理请求结束
+    private void handleRequestOver(Runnable timerRunnable) {
+        disposable = null;
+        if (handler != null) {
+            handler.removeCallbacks(timerRunnable);
+        }
     }
 
     private class TimerRunnable implements Runnable {
