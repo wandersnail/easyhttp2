@@ -5,11 +5,13 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import cn.wandersnail.http.callback.RequestCallback;
+import cn.wandersnail.http.converter.NothingConverter;
 import cn.wandersnail.http.download.DownloadInfo;
 import cn.wandersnail.http.download.DownloadListener;
 import cn.wandersnail.http.download.DownloadWorker;
@@ -109,7 +111,7 @@ public class EasyHttp {
     /**
      * 上传。异步的
      */
-    public static <T> UploadWorker<T> upload(@NonNull UploadInfo<T> info, UploadListener<T> listener) {
+    public static <T> UploadWorker<T> enqueueUpload(@NonNull UploadInfo<T> info, UploadListener<T> listener) {
         return new UploadWorker<>(info, listener);
     }
 
@@ -117,7 +119,7 @@ public class EasyHttp {
      * 上传。同步的
      */
     @NonNull
-    public static <T> ConvertedResponse<T> uploadSync(@NonNull UploadInfo<T> info, UploadProgressListener listener) {
+    public static <T> ConvertedResponse<T> executeUpload(@NonNull UploadInfo<T> info, UploadProgressListener listener) {
         return new SyncUploadWorker<>(info, listener).convertedResp;
     }
 
@@ -135,18 +137,18 @@ public class EasyHttp {
      * 普通GET请求。异步的
      */
     @NonNull
-    public static Disposable get(@NonNull String url, RequestCallback<ResponseBody> callback) {
+    public static Disposable enqueueGet(@NonNull String url, RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.get(url), null, config, callback);
+        return subscribe(config.service.get(url), new NothingConverter(), config, callback);
     }
 
     /**
      * 普通GET请求。同步的
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> get(@NonNull String url) {
+    public static ConvertedResponse<ResponseBody> executeGet(@NonNull String url) {
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.getSync(url), null, config);
+        return handleSyncResponse(config.service.getSync(url), new NothingConverter(), config);
     }
 
     /**
@@ -155,9 +157,9 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static Disposable get(Configuration configuration, @NonNull String url, RequestCallback<ResponseBody> callback) {
+    public static Disposable enqueueGet(Configuration configuration, @NonNull String url, RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.get(url), null, config, callback);
+        return subscribe(config.service.get(url), new NothingConverter(), config, callback);
     }
 
     /**
@@ -166,9 +168,9 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> get(Configuration configuration, @NonNull String url) {
+    public static ConvertedResponse<ResponseBody> executeGet(Configuration configuration, @NonNull String url) {
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.getSync(url), null, config);
+        return handleSyncResponse(config.service.getSync(url), new NothingConverter(), config);
     }
 
     /**
@@ -177,7 +179,8 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> Disposable get(@NonNull String url, Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueueGet(@NonNull String url, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, null);
         return subscribe(config.service.get(url), converter, config, callback);
     }
@@ -188,7 +191,8 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> get(@NonNull String url, Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executeGet(@NonNull String url, @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, null);
         return handleSyncResponse(config.service.getSync(url), converter, config);
     }
@@ -200,7 +204,8 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> Disposable get(Configuration configuration, @NonNull String url, Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueueGet(Configuration configuration, @NonNull String url, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
         return subscribe(config.service.get(url), converter, config, callback);
     }
@@ -212,7 +217,8 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> get(Configuration configuration, @NonNull String url, Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executeGet(Configuration configuration, @NonNull String url, @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
         return handleSyncResponse(config.service.getSync(url), converter, config);
     }
@@ -221,20 +227,20 @@ public class EasyHttp {
      * POST请求，body是json。异步的
      */
     @NonNull
-    public static Disposable postJson(@NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
+    public static Disposable enqueuePostJson(@NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.postJson(url, requestBody), null, config, callback);
+        return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
     }
 
     /**
      * POST请求，body是json。同步的
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postJson(@NonNull String url, @NonNull String json) {
+    public static ConvertedResponse<ResponseBody> executePostJson(@NonNull String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), null, config);
+        return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
     }
 
     /**
@@ -243,10 +249,10 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static Disposable postJson(Configuration configuration, @NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
+    public static Disposable enqueuePostJson(Configuration configuration, @NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postJson(url, requestBody), null, config, callback);
+        return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
     }
 
     /**
@@ -255,10 +261,10 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postJson(Configuration configuration, @NonNull String url, @NonNull String json) {
+    public static ConvertedResponse<ResponseBody> executePostJson(Configuration configuration, @NonNull String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), null, config);
+        return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
     }
 
     /**
@@ -267,8 +273,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> Disposable postJson(@NonNull String url, @NonNull String json,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostJson(@NonNull String url, @NonNull String json,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
         return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
@@ -280,8 +287,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postJson(@NonNull String url, @NonNull String json,
-                                                    Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostJson(@NonNull String url, @NonNull String json,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
         return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
@@ -294,8 +302,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> Disposable postJson(Configuration configuration, @NonNull String url, @NonNull String json,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostJson(Configuration configuration, @NonNull String url, @NonNull String json,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
         return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
@@ -308,8 +317,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postJson(Configuration configuration, @NonNull String url, @NonNull String json,
-                                                    Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostJson(Configuration configuration, @NonNull String url, @NonNull String json,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
         return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
@@ -319,21 +329,21 @@ public class EasyHttp {
      * POST请求，body是字符串。异步的
      */
     @NonNull
-    public static Disposable postText(@NonNull String url, @NonNull String text,
+    public static Disposable enqueuePostText(@NonNull String url, @NonNull String text,
                                       RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.post(url, requestBody), null, config, callback);
+        return subscribe(config.service.post(url, requestBody), new NothingConverter(), config, callback);
     }
 
     /**
      * POST请求，body是字符串。同步的
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postText(@NonNull String url, @NonNull String text) {
+    public static ConvertedResponse<ResponseBody> executePostText(@NonNull String url, @NonNull String text) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.postSync(url, requestBody), null, config);
+        return handleSyncResponse(config.service.postSync(url, requestBody), new NothingConverter(), config);
     }
 
     /**
@@ -342,11 +352,11 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static Disposable postText(Configuration configuration, @NonNull String url, @NonNull String text,
+    public static Disposable enqueuePostText(Configuration configuration, @NonNull String url, @NonNull String text,
                                       RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.post(url, requestBody), null, config, callback);
+        return subscribe(config.service.post(url, requestBody), new NothingConverter(), config, callback);
     }
 
     /**
@@ -355,11 +365,11 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postText(Configuration configuration, @NonNull String url,
+    public static ConvertedResponse<ResponseBody> executePostText(Configuration configuration, @NonNull String url,
                                                            @NonNull String text) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postSync(url, requestBody), null, config);
+        return handleSyncResponse(config.service.postSync(url, requestBody), new NothingConverter(), config);
     }
 
     /**
@@ -368,8 +378,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> Disposable postText(@NonNull String url, @NonNull String text,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostText(@NonNull String url, @NonNull String text,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, null);
         return subscribe(config.service.post(url, requestBody), converter, config, callback);
@@ -381,8 +392,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postText(@NonNull String url, @NonNull String text,
-                                                    Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostText(@NonNull String url, @NonNull String text,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, null);
         return handleSyncResponse(config.service.postSync(url, requestBody), converter, config);
@@ -395,8 +407,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> Disposable postText(Configuration configuration, @NonNull String url, @NonNull String text,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostText(Configuration configuration, @NonNull String url, @NonNull String text,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
         return subscribe(config.service.post(url, requestBody), converter, config, callback);
@@ -409,8 +422,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postText(Configuration configuration, @NonNull String url,
-                                                    @NonNull String text, Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostText(Configuration configuration, @NonNull String url, @NonNull String text,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
         return handleSyncResponse(config.service.postSync(url, requestBody), converter, config);
@@ -420,19 +434,19 @@ public class EasyHttp {
      * POST提交表单。异步的
      */
     @NonNull
-    public static Disposable postForm(@NonNull String url, @NonNull Map<String, Object> map,
+    public static Disposable enqueuePostForm(@NonNull String url, @NonNull Map<String, Object> map,
                                       RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.postForm(url, map), null, config, callback);
+        return subscribe(config.service.postForm(url, map), new NothingConverter(), config, callback);
     }
 
     /**
      * POST提交表单。同步的
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postForm(@NonNull String url, @NonNull Map<String, Object> map) {
+    public static ConvertedResponse<ResponseBody> executePostForm(@NonNull String url, @NonNull Map<String, Object> map) {
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.postFormSync(url, map), null, config);
+        return handleSyncResponse(config.service.postFormSync(url, map), new NothingConverter(), config);
     }
 
     /**
@@ -441,10 +455,10 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static Disposable postForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
+    public static Disposable enqueuePostForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
                                       RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postForm(url, map), null, config, callback);
+        return subscribe(config.service.postForm(url, map), new NothingConverter(), config, callback);
     }
 
     /**
@@ -453,10 +467,10 @@ public class EasyHttp {
      * @param configuration 配置
      */
     @NonNull
-    public static ConvertedResponse<ResponseBody> postForm(Configuration configuration, @NonNull String url,
+    public static ConvertedResponse<ResponseBody> executePostForm(Configuration configuration, @NonNull String url,
                                                            @NonNull Map<String, Object> map) {
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postFormSync(url, map), null, config);
+        return handleSyncResponse(config.service.postFormSync(url, map), new NothingConverter(), config);
     }
 
     /**
@@ -465,8 +479,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> Disposable postForm(@NonNull String url, @NonNull Map<String, Object> map,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostForm(@NonNull String url, @NonNull Map<String, Object> map,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, null);
         return subscribe(config.service.postForm(url, map), converter, config, callback);
     }
@@ -477,8 +492,9 @@ public class EasyHttp {
      * @param converter 响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postForm(@NonNull String url, @NonNull Map<String, Object> map,
-                                                    Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostForm(@NonNull String url, @NonNull Map<String, Object> map,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, null);
         return handleSyncResponse(config.service.postFormSync(url, map), converter, config);
     }
@@ -490,8 +506,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> Disposable postForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
-                                          Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+    public static <T> Disposable enqueuePostForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
+                                          @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
         return subscribe(config.service.postForm(url, map), converter, config, callback);
     }
@@ -503,8 +520,9 @@ public class EasyHttp {
      * @param converter     响应体转换器
      */
     @NonNull
-    public static <T> ConvertedResponse<T> postForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
-                                                    Converter<ResponseBody, T> converter) {
+    public static <T> ConvertedResponse<T> executePostForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
+                                                    @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
         return handleSyncResponse(config.service.postFormSync(url, map), converter, config);
     }

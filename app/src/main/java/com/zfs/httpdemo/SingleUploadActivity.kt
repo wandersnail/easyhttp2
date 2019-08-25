@@ -3,7 +3,6 @@ package com.zfs.httpdemo
 import android.content.Intent
 import android.os.Bundle
 import cn.wandersnail.fileselector.FileSelector
-import cn.wandersnail.fileselector.OnFileSelectListener
 import cn.wandersnail.http.EasyHttp
 import cn.wandersnail.http.TaskInfo
 import cn.wandersnail.http.converter.JsonResponseConverter
@@ -29,12 +28,10 @@ class SingleUploadActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_upload)
         fileSelector.setSelectionMode(FileSelector.FILES_ONLY)
-        fileSelector.setOnFileSelectListener(object : OnFileSelectListener {
-            override fun onFileSelect(paths: List<String>) {
-                path = paths[0]
-                tvPath.text = path
-            }
-        })
+        fileSelector.setOnFileSelectListener { paths ->
+            path = paths[0]
+            tvPath.text = path
+        }
         btnSelectFile.setOnClickListener { 
             fileSelector.select(this)
         }
@@ -49,7 +46,7 @@ class SingleUploadActivity : BaseActivity() {
                 val info = UploadInfo<BaseResp>(url, files)
                 info.setParamParts(args)
                 info.setConverter(JsonResponseConverter(BaseResp::class.java))
-                worker = EasyHttp.upload(info, object : UploadListener<BaseResp> {
+                worker = EasyHttp.enqueueUpload(info, object : UploadListener<BaseResp> {
                     override fun onResponseBodyParse(response: Response, convertedBody: BaseResp?) {
                         tvResponse.text = response.toString()
                     }

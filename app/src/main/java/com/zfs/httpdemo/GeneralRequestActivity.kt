@@ -9,7 +9,7 @@ import cn.wandersnail.http.converter.JsonResponseConverter
 import cn.wandersnail.http.converter.StringResponseConverter
 import kotlinx.android.synthetic.main.activity_general_request.*
 import okhttp3.Response
-import okhttp3.ResponseBody
+import kotlin.concurrent.thread
 
 /**
  *
@@ -24,20 +24,35 @@ class GeneralRequestActivity : BaseActivity() {
         btnGet.setOnClickListener { 
             val config = Configuration()
             config.callTimeout = 4
-            EasyHttp.get(config, "http://192.168.137.1:8080/testapi?username=get&password=123456", object : RequestCallback<ResponseBody> {
-                override fun onSuccess(response: Response, convertedBody: ResponseBody?) {
-                    val resp = convertedBody?.string()
-                    Log.e("get", "onNext: $resp")
-                    tvResp.text = resp
+//            EasyHttp.enqueueGet(config, "https://gitee.com/fszeng/HttpDemo/blob/master/problems.md", object : RequestCallback<ResponseBody> {
+//                override fun onSuccess(response: Response, convertedBody: ResponseBody?) {
+//                    val resp = convertedBody?.string()
+//                    Log.e("get", "onNext: $resp")
+//                    tvResp.text = resp
+//                }
+//
+//                override fun onError(t: Throwable) {
+//                    Log.e("get", "onError: ${t.message}")
+//                }
+//            })
+            thread { 
+                val response = EasyHttp.executeGet(
+                    config,
+                    "https://gitee.com/fszeng/HttpDemo/blob/master/problems.md"
+                )
+                runOnUiThread {
+                    if (response.convertError != null) {
+                        Log.e("get", "onError: ${response.convertError!!.message}")
+                    } else {
+                        val resp = response.convertedResponse?.string()
+                        Log.e("get", "converted: $resp")
+                        tvResp.text = resp
+                    }
                 }
-
-                override fun onError(t: Throwable) {
-                    Log.e("get", "onError: ${t.message}")
-                }
-            })
+            }
         }
         btnPostText.setOnClickListener {
-            EasyHttp.postText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
+            EasyHttp.enqueuePostText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
                 override fun onSuccess(response: Response, convertedBody: String?) {
                     tvResp.text = convertedBody
                 }
@@ -48,7 +63,7 @@ class GeneralRequestActivity : BaseActivity() {
             })          
         }
         btnPostJson.setOnClickListener {
-            EasyHttp.postJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
+            EasyHttp.enqueuePostJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
 
                 override fun onSuccess(response: Response, convertedBody: String?) {
                     tvResp.text = convertedBody
@@ -63,7 +78,7 @@ class GeneralRequestActivity : BaseActivity() {
             val map = HashMap<String, Any>()
             map["postForm"] = "laomao"
             map["password"] = 123456
-            EasyHttp.postForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object :
+            EasyHttp.enqueuePostForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object :
                 RequestCallback<BaseResp> {
 
                 override fun onSuccess(response: Response, convertedBody: BaseResp?) {

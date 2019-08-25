@@ -178,6 +178,13 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
     }
 
     /**
+     * 是否已取消
+     */
+    public boolean isCanceled() {
+        return isCanceled;
+    }
+
+    /**
      * 进行中的下载任务数
      */
     public int remaining() {

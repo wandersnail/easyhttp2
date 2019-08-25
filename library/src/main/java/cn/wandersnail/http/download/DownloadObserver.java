@@ -2,7 +2,13 @@ package cn.wandersnail.http.download;
 
 import androidx.annotation.NonNull;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import cn.wandersnail.http.TaskInfo;
 import cn.wandersnail.http.callback.ProgressListener;
@@ -84,10 +90,12 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
             File destFile = new File(info.savePath);
             destFile.delete();//如果目标有文件，删除
             File tempFile = info.getTemporaryFile();
-            boolean success = tempFile.renameTo(destFile);
+            copyFile(tempFile, destFile);            
+            boolean success = destFile.exists() && tempFile.length() == destFile.length();
             if (!success) {
-                tempFile.delete();
+                destFile.delete();
             }
+            tempFile.delete();
             AndroidSchedulers.mainThread().scheduleDirect(() -> {
                 if (success) {
                     //更新进度
@@ -105,6 +113,38 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
                 }
             });
         });
+    }
+
+    private void copyFile(@NonNull File src, @NonNull File target) {
+        BufferedInputStream fis = null;
+        BufferedOutputStream fos = null;
+        try {
+            fis = new BufferedInputStream(new FileInputStream(src));
+            fos = new BufferedOutputStream(new FileOutputStream(target));
+            byte[] buffer = new byte[40960];
+            int len;
+            while ((len = fis.read(buffer)) != -1) {
+                fos.write(buffer, 0, len);
+            }
+            fos.flush();
+        } catch (Exception e) {
+            target.delete();
+        } finally {
+            closeQuietly(fis, fos);
+        }
+    }
+    
+    private void closeQuietly(Closeable... closeables) {
+        try {
+            if (closeables != null) {
+                for (Closeable closeable : closeables) {
+                    if (closeable != null) {
+                        closeable.close();
+                    }
+                }
+            }
+        } catch (IOException ignore) {
+        }
     }
     
     private void updateProgress() {

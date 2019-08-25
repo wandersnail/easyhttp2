@@ -3,6 +3,8 @@ package cn.wandersnail.http;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import java.util.concurrent.TimeoutException;
 
 import cn.wandersnail.http.callback.RequestCallback;
@@ -25,7 +27,7 @@ class GeneralRequestTask<T> {
     Disposable disposable;
     private Handler handler;
 
-    GeneralRequestTask(Observable<Response<ResponseBody>> observable, Converter<ResponseBody, T> converter,
+    GeneralRequestTask(Observable<Response<ResponseBody>> observable, @NonNull Converter<ResponseBody, T> converter,
                               Configuration configuration, RequestCallback<T> callback) {
         this.configuration = configuration;
         this.callback = callback;
@@ -38,14 +40,10 @@ class GeneralRequestTask<T> {
         disposable = observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
                 .subscribe(response -> {
                     if (callback != null) {
-                        if (converter != null) {
-                            try {
-                                callback.onSuccess(response.raw(), converter.convert(response.body()));
-                            } catch (Throwable t) {
-                                callback.onError(t);
-                            }
-                        } else {
-                            callback.onSuccess(response.raw(), null);
+                        try {
+                            callback.onSuccess(response.raw(), converter.convert(response.body()));
+                        } catch (Throwable t) {
+                            callback.onError(t);
                         }
                     }
                 }, throwable -> {
