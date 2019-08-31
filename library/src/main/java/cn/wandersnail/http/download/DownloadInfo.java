@@ -20,7 +20,7 @@ import cn.wandersnail.http.TaskInfo;
  * author: zengfansheng
  */
 public class DownloadInfo extends TaskInfo {
-    final String savePath;
+    public final String savePath;
     long contentLength;//总长度
     long completionLength;//已完成长度
     private Application application;
