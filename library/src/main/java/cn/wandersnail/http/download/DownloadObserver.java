@@ -88,7 +88,13 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
         Schedulers.io().scheduleDirect(() -> {
             //将临时文件重命名为目标路径
             File destFile = new File(info.savePath);
-            destFile.delete();//如果目标有文件，删除
+            File parentFile = destFile.getParentFile();
+            if (parentFile != null && !parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+            if (destFile.exists()) {
+                destFile.delete();//如果目标有文件，删除
+            }
             File tempFile = info.getTemporaryFile();
             copyFile(tempFile, destFile);            
             boolean success = destFile.exists() && tempFile.length() == destFile.length();
