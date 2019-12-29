@@ -7,10 +7,13 @@ import java.util.Map;
 
 import cn.wandersnail.http.util.HttpUtils;
 import cn.wandersnail.http.util.SchedulerUtils;
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
@@ -50,10 +53,15 @@ public class UploadWorker<T> implements Disposable {
                 e.printStackTrace();
             }
         }
-        service.upload(info.url, bodyBuilder.build())
-                .compose(SchedulerUtils.applyGeneralObservableSchedulers())
+        Observable<Response<ResponseBody>> observable;
+        if (info.headers == null || info.headers.isEmpty()) {
+            observable = service.upload(info.url, bodyBuilder.build());
+        } else {
+            observable = service.upload(info.url, bodyBuilder.build(), info.headers);
+        }
+        observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
                 .subscribe(observer);
-    }
+    }    
 
     @Override
     public void dispose() {

@@ -11,6 +11,7 @@ import retrofit2.http.Body;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.HeaderMap;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Url;
@@ -47,4 +48,30 @@ public interface HttpService {
 
     @POST
     Call<ResponseBody> postSync(@Url String url, @Body RequestBody body);
+
+    @GET
+    Observable<Response<ResponseBody>> get(@Url String url, @HeaderMap Map<String, String> headers);
+
+    @POST
+    @FormUrlEncoded
+    Observable<Response<ResponseBody>> postForm(@Url String url, @FieldMap Map<String, Object> map, @HeaderMap Map<String, String> headers);
+
+    @POST
+    Observable<Response<ResponseBody>> postJson(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+
+    @POST
+    Observable<Response<ResponseBody>> post(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+
+    @GET
+    Call<ResponseBody> getSync(@Url String url, @HeaderMap Map<String, String> headers);
+
+    @POST
+    @FormUrlEncoded
+    Call<ResponseBody> postFormSync(@Url String url, @FieldMap Map<String, Object> map, @HeaderMap Map<String, String> headers);
+
+    @POST
+    Call<ResponseBody> postJsonSync(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+
+    @POST
+    Call<ResponseBody> postSync(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
 }

@@ -159,7 +159,11 @@ public class EasyHttp {
     @NonNull
     public static Disposable enqueueGet(Configuration configuration, @NonNull String url, RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.get(url), new NothingConverter(), config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.get(url, config.headers), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.get(url), new NothingConverter(), config, callback);
+        }        
     }
 
     /**
@@ -170,7 +174,11 @@ public class EasyHttp {
     @NonNull
     public static ConvertedResponse<ResponseBody> executeGet(Configuration configuration, @NonNull String url) {
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.getSync(url), new NothingConverter(), config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.getSync(url, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.getSync(url), new NothingConverter(), config);            
+        }
     }
 
     /**
@@ -207,7 +215,11 @@ public class EasyHttp {
     public static <T> Disposable enqueueGet(Configuration configuration, @NonNull String url, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
         Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.get(url), converter, config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.get(url, config.headers), converter, config, callback);            
+        } else {
+            return subscribe(config.service.get(url), converter, config, callback);
+        }
     }
 
     /**
@@ -220,7 +232,11 @@ public class EasyHttp {
     public static <T> ConvertedResponse<T> executeGet(Configuration configuration, @NonNull String url, @NonNull Converter<ResponseBody, T> converter) {
         Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.getSync(url), converter, config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.getSync(url, config.headers), converter, config);            
+        } else {
+            return handleSyncResponse(config.service.getSync(url), converter, config);
+        }
     }
 
     /**
@@ -252,7 +268,13 @@ public class EasyHttp {
     public static Disposable enqueuePostJson(Configuration configuration, @NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            config.headers.put("Content-Type", "application/json;charset=utf-8");
+            config.headers.put("Accept", "application/json;");
+            return subscribe(config.service.postJson(url, requestBody, config.headers), new NothingConverter(), config, callback);            
+        } else {
+            return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
+        }
     }
 
     /**
@@ -264,7 +286,13 @@ public class EasyHttp {
     public static ConvertedResponse<ResponseBody> executePostJson(Configuration configuration, @NonNull String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            config.headers.put("Content-Type", "application/json;charset=utf-8");
+            config.headers.put("Accept", "application/json;");
+            return handleSyncResponse(config.service.postJsonSync(url, requestBody, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
+        }
     }
 
     /**
@@ -307,7 +335,13 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            config.headers.put("Content-Type", "application/json;charset=utf-8");
+            config.headers.put("Accept", "application/json;");
+            return subscribe(config.service.postJson(url, requestBody, config.headers), converter, config, callback);
+        } else {
+            return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
+        }
     }
 
     /**
@@ -322,7 +356,13 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            config.headers.put("Content-Type", "application/json;charset=utf-8");
+            config.headers.put("Accept", "application/json;");
+            return handleSyncResponse(config.service.postJsonSync(url, requestBody, config.headers), converter, config);
+        } else {
+            return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
+        }
     }
 
     /**
@@ -356,7 +396,11 @@ public class EasyHttp {
                                       RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.post(url, requestBody), new NothingConverter(), config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.post(url, requestBody, config.headers), new NothingConverter(), config, callback);            
+        } else {
+            return subscribe(config.service.post(url, requestBody), new NothingConverter(), config, callback);
+        }
     }
 
     /**
@@ -369,7 +413,11 @@ public class EasyHttp {
                                                            @NonNull String text) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postSync(url, requestBody), new NothingConverter(), config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postSync(url, requestBody, config.headers), new NothingConverter(), config);           
+        } else {
+            return handleSyncResponse(config.service.postSync(url, requestBody), new NothingConverter(), config);            
+        }
     }
 
     /**
@@ -412,7 +460,11 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.post(url, requestBody), converter, config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.post(url, requestBody, config.headers), converter, config, callback);            
+        } else {
+            return subscribe(config.service.post(url, requestBody), converter, config, callback);
+        }
     }
 
     /**
@@ -427,7 +479,11 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postSync(url, requestBody), converter, config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postSync(url, requestBody, config.headers), converter, config);            
+        } else {
+            return handleSyncResponse(config.service.postSync(url, requestBody), converter, config);
+        }
     }
 
     /**
@@ -458,7 +514,11 @@ public class EasyHttp {
     public static Disposable enqueuePostForm(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> map,
                                       RequestCallback<ResponseBody> callback) {
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postForm(url, map), new NothingConverter(), config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.postForm(url, map, config.headers), new NothingConverter(), config, callback);            
+        } else {
+            return subscribe(config.service.postForm(url, map), new NothingConverter(), config, callback);
+        }
     }
 
     /**
@@ -470,7 +530,11 @@ public class EasyHttp {
     public static ConvertedResponse<ResponseBody> executePostForm(Configuration configuration, @NonNull String url,
                                                            @NonNull Map<String, Object> map) {
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postFormSync(url, map), new NothingConverter(), config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postFormSync(url, map, config.headers), new NothingConverter(), config);            
+        } else {
+            return handleSyncResponse(config.service.postFormSync(url, map), new NothingConverter(), config);
+        }
     }
 
     /**
@@ -510,7 +574,11 @@ public class EasyHttp {
                                           @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
         Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
-        return subscribe(config.service.postForm(url, map), converter, config, callback);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.postForm(url, map, config.headers), converter, config, callback);            
+        } else {
+            return subscribe(config.service.postForm(url, map), converter, config, callback);
+        }
     }
 
     /**
@@ -524,6 +592,10 @@ public class EasyHttp {
                                                     @NonNull Converter<ResponseBody, T> converter) {
         Objects.requireNonNull(converter, "converter can't be null");
         Configuration config = getConfiguration(url, configuration);
-        return handleSyncResponse(config.service.postFormSync(url, map), converter, config);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postFormSync(url, map, config.headers), converter, config);            
+        } else {
+            return handleSyncResponse(config.service.postFormSync(url, map), converter, config);
+        }
     }
 }

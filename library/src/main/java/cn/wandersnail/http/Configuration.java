@@ -1,5 +1,7 @@
 package cn.wandersnail.http;
 
+import java.util.Map;
+
 import retrofit2.Retrofit;
 
 /**
@@ -21,5 +23,9 @@ public class Configuration {
      * 使用自定义的Retrofit
      */
     public Retrofit retrofit;
+    /**
+     * 请求头
+     */
+    public Map<String, String> headers;
     HttpService service;
 }

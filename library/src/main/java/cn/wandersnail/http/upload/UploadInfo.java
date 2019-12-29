@@ -20,6 +20,7 @@ public class UploadInfo<T> extends TaskInfo {
     Map<String, String> paramParts;
     final Map<String, File> fileParts;
     OkHttpClient client;
+    Map<String, String> headers;
 
     public UploadInfo(@NonNull String url, @NonNull Map<String, File> fileParts) {
         this(UUID.randomUUID().toString(), url, fileParts);
@@ -28,6 +29,17 @@ public class UploadInfo<T> extends TaskInfo {
     public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts) {
         super(tag, url);
         this.fileParts = fileParts;        
+    }
+
+    public UploadInfo(@NonNull String url, @NonNull Map<String, File> fileParts, @NonNull Map<String, String> headers) {
+        this(UUID.randomUUID().toString(), url, fileParts);
+        this.headers = headers;
+    }
+
+    public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts, @NonNull Map<String, String> headers) {
+        super(tag, url);
+        this.fileParts = fileParts;
+        this.headers = headers;
     }
 
     /**

@@ -58,7 +58,12 @@ public class SyncUploadWorker<T> {
                 e.printStackTrace();
             }
         }
-        Call<ResponseBody> call = service.uploadSync(info.url, bodyBuilder.build());
+        Call<ResponseBody> call;
+        if (info.headers == null || info.headers.isEmpty()) {
+            call = service.uploadSync(info.url, bodyBuilder.build());
+        } else {
+            call = service.uploadSync(info.url, bodyBuilder.build(), info.headers);
+        }
         convertedResp = new ConvertedResponse<>(call);
         try {
             Response<ResponseBody> response = call.execute();
