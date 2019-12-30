@@ -3,6 +3,7 @@ package cn.wandersnail.http;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -240,13 +241,110 @@ public class EasyHttp {
     }
 
     /**
+     * POST请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueuePost(@NonNull String url, @NonNull Map<String, Object> params, 
+                                         @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.post(url, params, body), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * POST请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executePost(@NonNull String url, @NonNull Map<String, Object> params, @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.postSync(url, params, body), new NothingConverter(), config);
+    }
+
+    /**
+     * POST请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueuePost(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                         @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.post(url, params, body, config.headers), new NothingConverter(), config, callback);            
+        } else {
+            return subscribe(config.service.post(url, params, body), new NothingConverter(), config, callback);            
+        }
+    }
+
+    /**
+     * POST请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executePost(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params, @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postSync(url, params, body, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.postSync(url, params, body), new NothingConverter(), config);            
+        }
+    }
+
+    /**
+     * POST请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueuePost(@NonNull String url, @NonNull Map<String, Object> params, @NonNull RequestBody body,
+                                         @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.post(url, params, body), converter, config, callback);
+    }
+
+    /**
+     * POST请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executePost(@NonNull String url, @NonNull Map<String, Object> params, 
+                                                              @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.postSync(url, params, body), converter, config);
+    }
+
+    /**
+     * POST请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueuePost(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                         @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.post(url, params, body, config.headers), converter, config, callback);
+        } else {
+            return subscribe(config.service.post(url, params, body), converter, config, callback);
+        }
+    }
+
+    /**
+     * POST请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executePost(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params, 
+                                                       @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.postSync(url, params, body, config.headers), converter, config);
+        } else {
+            return handleSyncResponse(config.service.postSync(url, params, body), converter, config);
+        }
+    }
+    
+    /**
      * POST请求，body是json。异步的
      */
     @NonNull
     public static Disposable enqueuePostJson(@NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
+        Map<String, String> headers = new HashMap<>(); 
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return subscribe(config.service.post(url, requestBody, headers), new NothingConverter(), config, callback);
     }
 
     /**
@@ -256,7 +354,10 @@ public class EasyHttp {
     public static ConvertedResponse<ResponseBody> executePostJson(@NonNull String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.postSync(url, requestBody, headers), new NothingConverter(), config);
     }
 
     /**
@@ -268,13 +369,12 @@ public class EasyHttp {
     public static Disposable enqueuePostJson(Configuration configuration, @NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        if (config.headers != null && !config.headers.isEmpty()) {
-            config.headers.put("Content-Type", "application/json;charset=utf-8");
-            config.headers.put("Accept", "application/json;");
-            return subscribe(config.service.postJson(url, requestBody, config.headers), new NothingConverter(), config, callback);            
-        } else {
-            return subscribe(config.service.postJson(url, requestBody), new NothingConverter(), config, callback);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
         }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return subscribe(config.service.post(url, requestBody, config.headers), new NothingConverter(), config, callback);
     }
 
     /**
@@ -286,13 +386,12 @@ public class EasyHttp {
     public static ConvertedResponse<ResponseBody> executePostJson(Configuration configuration, @NonNull String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        if (config.headers != null && !config.headers.isEmpty()) {
-            config.headers.put("Content-Type", "application/json;charset=utf-8");
-            config.headers.put("Accept", "application/json;");
-            return handleSyncResponse(config.service.postJsonSync(url, requestBody, config.headers), new NothingConverter(), config);
-        } else {
-            return handleSyncResponse(config.service.postJsonSync(url, requestBody), new NothingConverter(), config);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
         }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.postSync(url, requestBody, config.headers), new NothingConverter(), config);
     }
 
     /**
@@ -306,7 +405,10 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return subscribe(config.service.post(url, requestBody, headers), converter, config, callback);
     }
 
     /**
@@ -320,7 +422,10 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, null);
-        return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.postSync(url, requestBody, headers), converter, config);
     }
 
     /**
@@ -335,13 +440,12 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        if (config.headers != null && !config.headers.isEmpty()) {
-            config.headers.put("Content-Type", "application/json;charset=utf-8");
-            config.headers.put("Accept", "application/json;");
-            return subscribe(config.service.postJson(url, requestBody, config.headers), converter, config, callback);
-        } else {
-            return subscribe(config.service.postJson(url, requestBody), converter, config, callback);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
         }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return subscribe(config.service.post(url, requestBody, config.headers), converter, config, callback);
     }
 
     /**
@@ -356,13 +460,12 @@ public class EasyHttp {
         Objects.requireNonNull(converter, "converter can't be null");
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
         Configuration config = getConfiguration(url, configuration);
-        if (config.headers != null && !config.headers.isEmpty()) {
-            config.headers.put("Content-Type", "application/json;charset=utf-8");
-            config.headers.put("Accept", "application/json;");
-            return handleSyncResponse(config.service.postJsonSync(url, requestBody, config.headers), converter, config);
-        } else {
-            return handleSyncResponse(config.service.postJsonSync(url, requestBody), converter, config);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
         }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.postSync(url, requestBody, config.headers), converter, config);
     }
 
     /**
