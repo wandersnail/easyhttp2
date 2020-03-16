@@ -1,6 +1,5 @@
 package cn.wandersnail.http.upload;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -42,12 +41,12 @@ public class UploadWorker<T> implements Disposable {
                 bodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
             }
         }
-        for (Map.Entry<String, File> entry : info.fileParts.entrySet()) {
+        for (Map.Entry<String, FileInfo> entry : info.fileParts.entrySet()) {
             try {
                 MultipartBody.Part part = MultipartBody.Part.createFormData(entry.getKey(),
                         URLEncoder.encode(entry.getValue().getName(), "utf-8"),
                         new ProgressRequestBody(MediaType.parse("multipart/form-data"), entry.getKey(),
-                                entry.getValue(), observer));
+                                entry.getValue().getInputStream(), observer));
                 bodyBuilder.addPart(part);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
