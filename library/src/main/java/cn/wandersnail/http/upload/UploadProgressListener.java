@@ -8,9 +8,9 @@ public interface UploadProgressListener {
     /**
      * 进度更新
      *
-     * @param name     文件参数名。fileParts里的key
+     * @param filename 文件名
      * @param progress 已完成的大小
      * @param max      总大小
      */
-    void onProgress(String name, long progress, long max);
+    void onProgress(String filename, long progress, long max);
 }

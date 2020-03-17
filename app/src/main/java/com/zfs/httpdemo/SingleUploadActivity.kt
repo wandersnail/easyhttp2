@@ -67,7 +67,7 @@ class SingleUploadActivity : BaseActivity() {
                         tvState.text = log
                     }
 
-                    override fun onProgress(name: String, progress: Long, max: Long) {
+                    override fun onProgress(filename: String, progress: Long, max: Long) {
                         progressBar.progress = (progress * progressBar.max / max).toInt()
                     }
                 })

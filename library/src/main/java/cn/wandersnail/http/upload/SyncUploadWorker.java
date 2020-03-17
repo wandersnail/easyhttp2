@@ -46,12 +46,12 @@ public class SyncUploadWorker<T> {
                 handler.post(() -> listener.onProgress(name, progress, max));
             }
         });
-        for (Map.Entry<String, FileInfo> entry : info.fileParts.entrySet()) {
+        for (FileInfo fileInfo : info.fileInfos) {
             try {
-                MultipartBody.Part part = MultipartBody.Part.createFormData(entry.getKey(),
-                        URLEncoder.encode(entry.getValue().getName(), "utf-8"),
-                        new ProgressRequestBody(MediaType.parse("multipart/form-data"), entry.getKey(),
-                                entry.getValue().getInputStream(), localListener));
+                MultipartBody.Part part = MultipartBody.Part.createFormData(fileInfo.getFromDataName(),
+                        URLEncoder.encode(fileInfo.getFilename(), "utf-8"),
+                        new ProgressRequestBody(MediaType.parse("multipart/form-data"), fileInfo.getFilename(),
+                                fileInfo.getInputStream(), localListener));
                 bodyBuilder.addPart(part);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

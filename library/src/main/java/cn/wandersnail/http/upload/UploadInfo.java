@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,9 +21,9 @@ import retrofit2.Converter;
 public class UploadInfo<T> extends TaskInfo {
     Converter<ResponseBody, T> converter;
     Map<String, String> paramParts;
-    Map<String, FileInfo> fileParts;
     OkHttpClient client;
     Map<String, String> headers;
+    List<FileInfo> fileInfos;
 
     /**
      * @deprecated 
@@ -37,13 +38,14 @@ public class UploadInfo<T> extends TaskInfo {
      */
     public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts) {
         super(tag, url);
-        this.fileParts = new HashMap<>();
+        fileInfos = new ArrayList<>();
         for (Map.Entry<String, File> entry : fileParts.entrySet()) {
             try {
                 FileInfo info = new FileInfo();
-                info.setName(entry.getValue().getName());
+                info.setFromDataName(entry.getKey());
+                info.setFilename(entry.getValue().getName());
                 info.setInputStream(new FileInputStream(entry.getValue()));
-                this.fileParts.put(entry.getKey(), info);
+                fileInfos.add(info);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -63,13 +65,14 @@ public class UploadInfo<T> extends TaskInfo {
      */
     public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts, @NonNull Map<String, String> headers) {
         super(tag, url);
-        this.fileParts = new HashMap<>();
+        fileInfos = new ArrayList<>();
         for (Map.Entry<String, File> entry : fileParts.entrySet()) {
             try {
                 FileInfo info = new FileInfo();
-                info.setName(entry.getValue().getName());
+                info.setFromDataName(entry.getKey());
+                info.setFilename(entry.getValue().getName());
                 info.setInputStream(new FileInputStream(entry.getValue()));
-                this.fileParts.put(entry.getKey(), info);
+                fileInfos.add(info);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -85,8 +88,8 @@ public class UploadInfo<T> extends TaskInfo {
         super(url);
     }
 
-    public UploadInfo<T> setFileParts(Map<String, FileInfo> fileParts) {
-        this.fileParts = fileParts;
+    public UploadInfo<T> setFileParts(List<FileInfo> fileInfos) {
+        this.fileInfos = fileInfos;
         return this;
     }
 

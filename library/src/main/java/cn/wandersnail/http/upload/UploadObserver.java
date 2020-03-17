@@ -30,14 +30,14 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
     }
 
     @Override
-    public void onProgress(String name, long progress, long max) {
+    public void onProgress(String filename, long progress, long max) {
         AndroidSchedulers.mainThread().scheduleDirect(() -> {
             long completionLength = progress;
-            Long contentLen = contentLengthMap.get(name);
+            Long contentLen = contentLengthMap.get(filename);
             if (contentLen != null && contentLen > max) {
                 completionLength += contentLen - max;
             } else {
-                contentLengthMap.put(name, max);
+                contentLengthMap.put(filename, max);
                 contentLen = max;
             }
             if (System.currentTimeMillis() - lastUpdateTime >= UPDATE_LIMIT_DURATION && (info.state == TaskInfo.State.IDLE ||
@@ -49,7 +49,7 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
                     }
                 }
                 if (listener != null) {
-                    listener.onProgress(name, completionLength, contentLen);
+                    listener.onProgress(filename, completionLength, contentLen);
                 }
                 lastUpdateTime = System.currentTimeMillis();
             }

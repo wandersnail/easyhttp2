@@ -41,12 +41,12 @@ public class UploadWorker<T> implements Disposable {
                 bodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
             }
         }
-        for (Map.Entry<String, FileInfo> entry : info.fileParts.entrySet()) {
+        for (FileInfo fileInfo : info.fileInfos) {
             try {
-                MultipartBody.Part part = MultipartBody.Part.createFormData(entry.getKey(),
-                        URLEncoder.encode(entry.getValue().getName(), "utf-8"),
-                        new ProgressRequestBody(MediaType.parse("multipart/form-data"), entry.getKey(),
-                                entry.getValue().getInputStream(), observer));
+                MultipartBody.Part part = MultipartBody.Part.createFormData(fileInfo.getFromDataName(),
+                        URLEncoder.encode(fileInfo.getFilename(), "utf-8"),
+                        new ProgressRequestBody(MediaType.parse("multipart/form-data"), fileInfo.getFilename(),
+                                fileInfo.getInputStream(), observer));
                 bodyBuilder.addPart(part);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

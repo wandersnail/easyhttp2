@@ -7,21 +7,36 @@ import java.io.InputStream;
  * author: zengfansheng
  */
 public class FileInfo {    
-    private String name;   
+    private String fromDataName;
+    private String filename;   
     private InputStream inputStream;
 
     /**
-     * 文件名
+     * 表单数据的名称，例如：file
      */
-    public String getName() {
-        return name;
+    public String getFromDataName() {
+        return fromDataName;
+    }
+
+    /**
+     * 表单数据的名称，例如：file
+     */
+    public void setFromDataName(String fromDataName) {
+        this.fromDataName = fromDataName;
     }
 
     /**
      * 文件名
      */
-    public void setName(String name) {
-        this.name = name;
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * 文件名
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     /**
