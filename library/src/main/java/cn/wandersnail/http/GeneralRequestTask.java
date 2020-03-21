@@ -44,7 +44,8 @@ class GeneralRequestTask<T> {
                         try {
                             callback.onSuccess(response.raw(), converter.convert(response.body()));
                         } catch (Throwable t) {
-                            callback.onError(t);
+                            callback.onConvertError(t);
+                            callback.onSuccess(response.raw(), null);
                         }
                     }
                 }, throwable -> {

@@ -23,4 +23,9 @@ public interface UploadListener<T> extends UploadProgressListener {
      * @param convertedResponse 经过设置的转换器转换后的结果
      */
     void onResponseBodyParse(@NonNull Response response, @Nullable T convertedResponse);
+
+    /**
+     * 转换错误
+     */
+    default void onConvertError(@NonNull Throwable t) {}
 }

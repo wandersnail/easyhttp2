@@ -21,4 +21,6 @@ public interface RequestCallback<T> {
     void onSuccess(@NonNull Response response, @Nullable T convertedResponse);
 
     void onError(@NonNull Throwable t);
+    
+    default void onConvertError(@NonNull Throwable t) {}
 }
