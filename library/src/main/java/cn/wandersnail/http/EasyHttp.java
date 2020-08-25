@@ -75,9 +75,10 @@ public class EasyHttp {
         String baseUrl = HttpUtils.getBaseUrl(url);
         Configuration config = configuration == null ? new Configuration() : configuration;
         if (config.retrofit == null) {
+            int timeout = config.callTimeout > 0 ? config.callTimeout : 5;
             OkHttpClient client = HttpUtils.initHttpsClient(config.bypassAuth, new OkHttpClient.Builder())
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(timeout, TimeUnit.SECONDS)
+                    .connectTimeout(timeout, TimeUnit.SECONDS)
                     .build();
             config.retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
