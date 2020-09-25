@@ -71,13 +71,13 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
             if (info.converter != null) {
                 try {
                     T convertedBody = info.converter.convert(response.body());
-                    listener.onResponseBodyParse(response.raw(), convertedBody);
+                    listener.onResponseBodyParse(response, convertedBody);
                 } catch (Exception e) {
                     listener.onConvertError(e);
-                    listener.onResponseBodyParse(response.raw(), null);
+                    listener.onResponseBodyParse(response, null);
                 }
             } else {
-                listener.onResponseBodyParse(response.raw(), null);
+                listener.onResponseBodyParse(response, null);
             }
         }        
     }

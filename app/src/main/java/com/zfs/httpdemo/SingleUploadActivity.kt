@@ -10,7 +10,8 @@ import cn.wandersnail.http.upload.UploadInfo
 import cn.wandersnail.http.upload.UploadListener
 import cn.wandersnail.http.upload.UploadWorker
 import kotlinx.android.synthetic.main.activity_single_upload.*
-import okhttp3.Response
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.io.File
 
 /**
@@ -47,7 +48,7 @@ class SingleUploadActivity : BaseActivity() {
                 info.setParamParts(args)
                 info.setConverter(JsonResponseConverter(BaseResp::class.java))
                 worker = EasyHttp.enqueueUpload(info, object : UploadListener<BaseResp> {
-                    override fun onResponseBodyParse(response: Response, convertedBody: BaseResp?) {
+                    override fun onResponseBodyParse(response: Response<ResponseBody>, convertedBody: BaseResp?) {
                         tvResponse.text = response.toString()
                     }
 

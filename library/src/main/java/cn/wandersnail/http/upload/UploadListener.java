@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import cn.wandersnail.http.TaskInfo;
-import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
 
 /**
  * date: 2019/8/23 18:08
@@ -22,7 +23,7 @@ public interface UploadListener<T> extends UploadProgressListener {
      * @param response          原始响应
      * @param convertedResponse 经过设置的转换器转换后的结果
      */
-    void onResponseBodyParse(@NonNull Response response, @Nullable T convertedResponse);
+    void onResponseBodyParse(@NonNull Response<ResponseBody> response, @Nullable T convertedResponse);
 
     /**
      * 转换错误
