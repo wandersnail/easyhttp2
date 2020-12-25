@@ -26,14 +26,17 @@ class GeneralRequestActivity : BaseActivity() {
             val config = Configuration()
             config.callTimeout = 4
             EasyHttp.enqueueGet(config, "https://gitee.com/fszeng/HttpDemo/blob/master/problems.md", object : RequestCallback<ResponseBody> {
-                override fun onSuccess(response: Response, convertedBody: ResponseBody?) {
-                    val resp = convertedBody?.string()
-                    Log.e("get", "onNext: $resp")
-                    tvResp.text = resp
-                }
-
                 override fun onError(t: Throwable) {
                     Log.e("get", "onError: ${t.message}")
+                }
+
+                override fun onSuccess(
+                    response: retrofit2.Response<ResponseBody>,
+                    convertedResponse: ResponseBody?
+                ) {
+                    val resp = convertedResponse?.string()
+                    Log.e("get", "onNext: $resp")
+                    tvResp.text = resp
                 }
             })            
         }
@@ -58,7 +61,7 @@ class GeneralRequestActivity : BaseActivity() {
         }
         btnPostText.setOnClickListener {
             EasyHttp.enqueuePostText("http://192.168.137.1:8080/testapi", "Hello world!", StringResponseConverter(), object : RequestCallback<String> {
-                override fun onSuccess(response: Response, convertedBody: String?) {
+                override fun onSuccess(response: retrofit2.Response<ResponseBody>, convertedBody: String?) {
                     tvResp.text = convertedBody
                 }
 
@@ -70,7 +73,7 @@ class GeneralRequestActivity : BaseActivity() {
         btnPostJson.setOnClickListener {
             EasyHttp.enqueuePostJson("http://192.168.137.1:8080/testapi", "{\"msg\":\"Hello world!\"}", StringResponseConverter(), object : RequestCallback<String> {
 
-                override fun onSuccess(response: Response, convertedBody: String?) {
+                override fun onSuccess(response: retrofit2.Response<ResponseBody>, convertedBody: String?) {
                     tvResp.text = convertedBody
                 }
 
@@ -86,7 +89,7 @@ class GeneralRequestActivity : BaseActivity() {
             EasyHttp.enqueuePostForm("http://192.168.137.1:8080/testapi", map, JsonResponseConverter(BaseResp::class.java), object :
                 RequestCallback<BaseResp> {
 
-                override fun onSuccess(response: Response, convertedBody: BaseResp?) {
+                override fun onSuccess(response: retrofit2.Response<ResponseBody>, convertedBody: BaseResp?) {
                     Log.e("postForm", "onNext: code = ${convertedBody?.code}, msg = ${convertedBody?.msg}")
                     tvResp.text = "code = ${convertedBody?.code}, msg = ${convertedBody?.msg}"
                 }
