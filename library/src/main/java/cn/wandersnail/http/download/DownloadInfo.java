@@ -23,7 +23,7 @@ public class DownloadInfo extends TaskInfo {
     public final String savePath;
     long contentLength;//总长度
     long completionLength;//已完成长度
-    private Application application;
+    private final Application application;
     private final String tempFilename;
 
     /**
@@ -39,7 +39,7 @@ public class DownloadInfo extends TaskInfo {
      * @param url      请求地址
      * @param savePath 文件保存路径
      */
-    public DownloadInfo(String tag, @NonNull String url, @NonNull String savePath) {
+    public DownloadInfo(@NonNull String tag, @NonNull String url, @NonNull String savePath) {
         super(tag, url);
         this.savePath = savePath;
         application = tryGetApplication();

@@ -1,7 +1,5 @@
 package cn.wandersnail.http;
 
-import androidx.annotation.NonNull;
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Converter;
@@ -15,7 +13,7 @@ class SyncGeneralRequestTask<T> {
     private boolean complete;
     final ConvertedResponse<T> convertedResp;
 
-    SyncGeneralRequestTask(Call<ResponseBody> call, @NonNull Converter<ResponseBody, T> converter, Configuration configuration) {
+    SyncGeneralRequestTask(Call<ResponseBody> call, Converter<ResponseBody, T> converter, Configuration configuration) {
         convertedResp = new ConvertedResponse<>(call);
         if (configuration.callTimeout > 0) {
             EasyHttp.executorService.execute(() -> {
@@ -41,7 +39,7 @@ class SyncGeneralRequestTask<T> {
                 try {
                     ResponseBody body = response.body();
                     if (body != null) {
-                        convertedResp.convertedResponse = converter.convert(body);
+                        convertedResp.convertedResponse = converter == null ? (T) body : converter.convert(body);
                     }
                 } catch (Throwable t) {
                     convertedResp.convertError = t;

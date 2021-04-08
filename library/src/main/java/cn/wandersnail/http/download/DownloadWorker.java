@@ -28,32 +28,31 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
  */
 public class DownloadWorker<T extends DownloadInfo> implements Disposable {
     private final Map<T, DownloadObserver<T>> taskMap = new ConcurrentHashMap<>();
-    private DownloadListener<T> listener;
-    private int totalTasks;
+    private final DownloadListener<T> listener;
     private int successNum;
     private int failureNum;
     private boolean isCanceled;
+    private final int taskCount;
 
-    public DownloadWorker(T info, DownloadListener<T> listener) {
+    public DownloadWorker(@NonNull T info, DownloadListener<T> listener) {
         this.listener = listener;
-        totalTasks = 1;
+        taskCount = 1;
         info.reset();
         execute(info);
     }
 
-    public DownloadWorker(List<T> infos, MultiDownloadListener<T> listener) {
+    public DownloadWorker(@NonNull List<T> infoList, MultiDownloadListener<T> listener) {
         this.listener = listener;
-        totalTasks = infos.size();
-        for (T info : infos) {
+        taskCount = infoList.size();
+        for (T info : infoList) {
             info.reset();
-            execute(info);            
+            execute(info);
         }
     }
     
-    @SuppressWarnings("unchecked")
     private void execute(T info) {
         //如果listener为空，说明不需要监听，不为空则在本地监听后，再传出去
-        DownloadObserver observer = new DownloadObserver(info, listener == null ? null : new LocalTaskListener());
+        DownloadObserver<T> observer = new DownloadObserver<>(info, listener == null ? null : new LocalTaskListener());
         synchronized (this) {
             taskMap.put(info, observer);
         }
@@ -111,19 +110,17 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
             if (listener != null) {
                 listener.onStateChange(info, t);
             }
-            if (totalTasks > 1) {
-                if (info.state == TaskInfo.State.COMPLETED) {
-                    taskMap.remove(info);
-                    successNum++;                    
-                } else if (info.state == TaskInfo.State.CANCEL || info.state == TaskInfo.State.ERROR) {
-                    taskMap.remove(info);
-                    failureNum++;
-                } else if (info.state != TaskInfo.State.START) {
-                    return;
-                }
-                if (listener instanceof MultiDownloadListener) {
-                    ((MultiDownloadListener) listener).onTotalProgress(successNum, failureNum, totalTasks);
-                }
+            if (info.state == TaskInfo.State.COMPLETED) {
+                taskMap.remove(info);
+                successNum++;
+            } else if (info.state == TaskInfo.State.CANCEL || info.state == TaskInfo.State.ERROR) {
+                taskMap.remove(info);
+                failureNum++;
+            } else if (info.state != TaskInfo.State.START) {
+                return;
+            }
+            if (listener instanceof MultiDownloadListener) {
+                ((MultiDownloadListener<T>) listener).onTotalProgress(successNum, failureNum, taskCount);
             }
         }
 
@@ -134,7 +131,7 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
             }
         }
     }
-
+    
     /**
      * 取消所有下载
      */

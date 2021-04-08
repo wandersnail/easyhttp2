@@ -2,12 +2,8 @@ package cn.wandersnail.http.upload;
 
 import androidx.annotation.NonNull;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import cn.wandersnail.http.TaskInfo;
 import okhttp3.OkHttpClient;
@@ -25,62 +21,7 @@ public class UploadInfo<T> extends TaskInfo {
     Map<String, String> headers;
     List<FileInfo> fileInfos;
 
-    /**
-     * @deprecated 
-     */
-    @Deprecated
-    public UploadInfo(@NonNull String url, @NonNull Map<String, File> fileParts) {
-        this(UUID.randomUUID().toString(), url, fileParts);
-    }
-
-    /**
-     * @deprecated
-     */
-    public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts) {
-        super(tag, url);
-        fileInfos = new ArrayList<>();
-        for (Map.Entry<String, File> entry : fileParts.entrySet()) {
-            try {
-                FileInfo info = new FileInfo();
-                info.setFromDataName(entry.getKey());
-                info.setFilename(entry.getValue().getName());
-                info.setInputStream(new FileInputStream(entry.getValue()));
-                fileInfos.add(info);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    public UploadInfo(@NonNull String url, @NonNull Map<String, File> fileParts, @NonNull Map<String, String> headers) {
-        this(UUID.randomUUID().toString(), url, fileParts);
-        this.headers = headers;
-    }
-
-    /**
-     * @deprecated
-     */
-    public UploadInfo(String tag, @NonNull String url, Map<String, File> fileParts, @NonNull Map<String, String> headers) {
-        super(tag, url);
-        fileInfos = new ArrayList<>();
-        for (Map.Entry<String, File> entry : fileParts.entrySet()) {
-            try {
-                FileInfo info = new FileInfo();
-                info.setFromDataName(entry.getKey());
-                info.setFilename(entry.getValue().getName());
-                info.setInputStream(new FileInputStream(entry.getValue()));
-                fileInfos.add(info);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        this.headers = headers;
-    }
-
-    public UploadInfo(String tag, @NonNull String url) {
+    public UploadInfo(@NonNull String tag, @NonNull String url) {
         super(tag, url);
     }
 

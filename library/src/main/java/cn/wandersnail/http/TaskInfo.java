@@ -16,6 +16,7 @@ public class TaskInfo {
     /**
      * 唯一标识
      */
+    @NonNull
     public final String tag;
     /**
      * 请求地址
@@ -36,7 +37,7 @@ public class TaskInfo {
      * @param tag 唯一标识
      * @param url 请求地址
      */
-    public TaskInfo(String tag, @NonNull String url) {
+    public TaskInfo(@NonNull String tag, @NonNull String url) {
         this.tag = tag;
         this.url = url;
     }

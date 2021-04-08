@@ -37,43 +37,43 @@ public interface HttpService {
 
     @POST
     @FormUrlEncoded
-    Observable<Response<ResponseBody>> postForm(@Url String url, @FieldMap Map<String, Object> map);
+    Observable<Response<ResponseBody>> postForm(@Url String url, @FieldMap Map<String, Object> params);
 
     @POST
     Observable<Response<ResponseBody>> post(@Url String url, @Body RequestBody body);
 
     @POST
-    Observable<Response<ResponseBody>> post(@Url String url, @FieldMap Map<String, Object> map, @Body RequestBody body);
+    Observable<Response<ResponseBody>> postParamsAndBody(@Url String url, @FieldMap Map<String, Object> params, @Body RequestBody body);
 
     @POST
     @FormUrlEncoded
-    Call<ResponseBody> postFormSync(@Url String url, @FieldMap Map<String, Object> map);
+    Call<ResponseBody> postFormSync(@Url String url, @FieldMap Map<String, Object> params);
 
     @POST
     Call<ResponseBody> postSync(@Url String url, @Body RequestBody body);
     
     @POST
-    Call<ResponseBody> postSync(@Url String url, @FieldMap Map<String, Object> map, @Body RequestBody body);
+    Call<ResponseBody> postParamsAndBodySync(@Url String url, @FieldMap Map<String, Object> params, @Body RequestBody body);
 
     @POST
     @FormUrlEncoded
-    Observable<Response<ResponseBody>> postForm(@Url String url, @FieldMap Map<String, Object> map, @HeaderMap Map<String, String> headers);
+    Observable<Response<ResponseBody>> postForm(@Url String url, @HeaderMap Map<String, String> headers, @FieldMap Map<String, Object> params);
 
     @POST
-    Observable<Response<ResponseBody>> post(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Observable<Response<ResponseBody>> post(@Url String url, @HeaderMap Map<String, String> headers, @Body RequestBody body);
 
     @POST
-    Observable<Response<ResponseBody>> post(@Url String url, @FieldMap Map<String, Object> map, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Observable<Response<ResponseBody>> post(@Url String url, @HeaderMap Map<String, String> headers, @FieldMap Map<String, Object> params, @Body RequestBody body);
 
     @POST
     @FormUrlEncoded
-    Call<ResponseBody> postFormSync(@Url String url, @FieldMap Map<String, Object> map, @HeaderMap Map<String, String> headers);
+    Call<ResponseBody> postFormSync(@Url String url, @HeaderMap Map<String, String> headers, @FieldMap Map<String, Object> params);
 
     @POST
-    Call<ResponseBody> postSync(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Call<ResponseBody> postSync(@Url String url, @HeaderMap Map<String, String> headers, @Body RequestBody body);
 
     @POST
-    Call<ResponseBody> postSync(@Url String url, @FieldMap Map<String, Object> map, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Call<ResponseBody> postSync(@Url String url, @HeaderMap Map<String, String> headers, @FieldMap Map<String, Object> params, @Body RequestBody body);
     
     @DELETE
     Observable<Response<ResponseBody>> delete(@Url String url);
@@ -107,11 +107,11 @@ public interface HttpService {
                                                     @QueryMap Map<String, Object> params);
 
     @HTTP(method = "DELETE", hasBody = true)
-    Observable<Response<ResponseBody>> delete(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Observable<Response<ResponseBody>> delete(@Url String url, @HeaderMap Map<String, String> headers, @Body RequestBody body);
 
     @HTTP(method = "DELETE", hasBody = true)
-    Observable<Response<ResponseBody>> delete(@Url String url, @HeaderMap Map<String, String> headers,
-                                              @QueryMap Map<String, Object> params, @Body RequestBody body);
+    Observable<Response<ResponseBody>> deleteParamsAndBody(@Url String url, @HeaderMap Map<String, String> headers,
+                                                           @QueryMap Map<String, Object> params, @Body RequestBody body);
 
     @DELETE
     Call<ResponseBody> deleteSync(@Url String url, @HeaderMap Map<String, String> headers);
@@ -121,7 +121,7 @@ public interface HttpService {
                                         @QueryMap Map<String, Object> params);
 
     @HTTP(method = "DELETE", hasBody = true)
-    Call<ResponseBody> deleteSync(@Url String url, @Body RequestBody body, @HeaderMap Map<String, String> headers);
+    Call<ResponseBody> deleteSync(@Url String url, @HeaderMap Map<String, String> headers, @Body RequestBody body);
 
     @HTTP(method = "DELETE", hasBody = true)
     Call<ResponseBody> deleteSync(@Url String url, @HeaderMap Map<String, String> headers,

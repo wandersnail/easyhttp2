@@ -3,14 +3,9 @@ package com.zfs.httpdemo
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import cn.wandersnail.commons.helper.PermissionsRequester
 import cn.wandersnail.commons.util.ToastUtils
-import cn.wandersnail.widget.listview.BaseListAdapter
-import cn.wandersnail.widget.listview.BaseViewHolder
-import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -18,32 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val data = arrayListOf("单文件下载", "多文件下载", "普通请求", "文件上传")
-        val clsArr = arrayListOf(SingleDownloadActivity::class.java, MultiDownloadActivity::class.java, GeneralRequestActivity::class.java,
-                SingleUploadActivity::class.java)
-        lv.adapter = object : BaseListAdapter<String>(this, data) {
-            override fun createViewHolder(position: Int): BaseViewHolder<String> {
-                return object : BaseViewHolder<String> {
-                    private var tv: TextView? = null
-
-                    override fun onBind(item: String, position: Int) {
-                        tv?.text = item
-                    }
-
-                    override fun createView(): View {
-                        val view = View.inflate(this@MainActivity, android.R.layout.simple_list_item_1, null)
-                        tv = view.findViewById(android.R.id.text1)
-                        return view
-                    }
-                }
-            }
-        }
-        lv.setOnItemClickListener { _, _, position, _ ->
-            val intent = Intent(this, clsArr[position])
-            intent.putExtra(Constants.EXTRA_TITLE, data[position])
-            startActivity(intent)
-        }
+        setContentView(R.layout.activity_main)        
         requester = PermissionsRequester(this)
         val list = ArrayList<String>()
         list.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
