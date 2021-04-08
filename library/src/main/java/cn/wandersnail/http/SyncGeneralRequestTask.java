@@ -39,7 +39,10 @@ class SyncGeneralRequestTask<T> {
             convertedResp.raw = response.raw();
             if (response.isSuccessful()) {
                 try {
-                    convertedResp.convertedResponse = converter.convert(response.body());
+                    ResponseBody body = response.body();
+                    if (body != null) {
+                        convertedResp.convertedResponse = converter.convert(body);
+                    }
                 } catch (Throwable t) {
                     convertedResp.convertError = t;
                 }

@@ -22,7 +22,7 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
     private final UploadListener<T> listener;
     private Disposable disposable;
     private long lastUpdateTime;//上次进度更新时间
-    private Map<String, Long> contentLengthMap = new HashMap<>();
+    private final Map<String, Long> contentLengthMap = new HashMap<>();
 
     UploadObserver(@NonNull UploadInfo<T> info, UploadListener<T> listener) {
         this.info = info;

@@ -42,7 +42,8 @@ class GeneralRequestTask<T> {
                     handleRequestOver(timerRunnable);
                     if (callback != null) {
                         try {
-                            callback.onSuccess(response, converter.convert(response.body()));
+                            ResponseBody body = response.body();
+                            callback.onSuccess(response, body == null ? null : converter.convert(body));
                         } catch (Throwable t) {
                             callback.onConvertError(t);
                             callback.onSuccess(response, null);

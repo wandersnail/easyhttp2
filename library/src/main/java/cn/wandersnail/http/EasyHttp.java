@@ -136,7 +136,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。异步的
+     * GET请求。异步的
      */
     @NonNull
     public static Disposable enqueueGet(@NonNull String url, RequestCallback<ResponseBody> callback) {
@@ -145,7 +145,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。同步的
+     * GET请求。同步的
      */
     @NonNull
     public static ConvertedResponse<ResponseBody> executeGet(@NonNull String url) {
@@ -154,7 +154,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。异步的
+     * GET请求。异步的
      *
      * @param configuration 配置
      */
@@ -169,7 +169,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。同步的
+     * GET请求。同步的
      *
      * @param configuration 配置
      */
@@ -184,7 +184,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。异步的
+     * GET请求。异步的
      *
      * @param converter 响应体转换器
      */
@@ -196,7 +196,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。同步的
+     * GET请求。同步的
      *
      * @param converter 响应体转换器
      */
@@ -208,7 +208,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。异步的
+     * GET请求。异步的
      *
      * @param configuration 配置
      * @param converter     响应体转换器
@@ -225,7 +225,7 @@ public class EasyHttp {
     }
 
     /**
-     * 普通GET请求。同步的
+     * GET请求。同步的
      *
      * @param configuration 配置
      * @param converter     响应体转换器
@@ -700,6 +700,671 @@ public class EasyHttp {
             return handleSyncResponse(config.service.postFormSync(url, map, config.headers), converter, config);            
         } else {
             return handleSyncResponse(config.service.postFormSync(url, map), converter, config);
+        }
+    }
+
+    /**
+     * DELETE请求，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDelete(@NonNull String url, @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url, body), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDelete(@NonNull String url, @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url, body), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDelete(Configuration configuration, @NonNull String url,
+                                         @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, body, config.headers), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.delete(url, body), new NothingConverter(), config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDelete(Configuration configuration, @NonNull String url, @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, body, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url, body), new NothingConverter(), config);
+        }
+    }
+
+    /**
+     * DELETE请求，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueueDelete(@NonNull String url, @NonNull RequestBody body,
+                                             @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url, body), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDelete(@NonNull String url, @NonNull RequestBody body, 
+                                                         @NonNull Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url, body), converter, config);
+    }
+
+    /**
+     * DELETE请求，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueueDelete(Configuration configuration, @NonNull String url, @NonNull RequestBody body, 
+                                               @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, body, config.headers), converter, config, callback);
+        } else {
+            return subscribe(config.service.delete(url, body), converter, config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDelete(Configuration configuration, @NonNull String url,
+                                                       @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, body, config.headers), converter, config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url, body), converter, config);
+        }
+    }
+
+    /**
+     * DELETE请求，body是json。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDeleteJson(@NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, null);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return subscribe(config.service.delete(url, requestBody, headers), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求，body是json。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteJson(@NonNull String url, @NonNull String json) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, null);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.deleteSync(url, requestBody, headers), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求，body是json。异步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static Disposable enqueueDeleteJson(Configuration configuration, @NonNull String url, @NonNull String json, RequestCallback<ResponseBody> callback) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
+        }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return subscribe(config.service.delete(url, requestBody, config.headers), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求，body是json。同步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteJson(Configuration configuration, @NonNull String url, @NonNull String json) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
+        }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.deleteSync(url, requestBody, config.headers), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求，body是json。异步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteJson(@NonNull String url, @NonNull String json,
+                                                 @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, null);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return subscribe(config.service.delete(url, requestBody, headers), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求，body是json。同步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteJson(@NonNull String url, @NonNull String json,
+                                                           @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, null);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=utf-8");
+        headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.deleteSync(url, requestBody, headers), converter, config);
+    }
+
+    /**
+     * DELETE请求，body是json。异步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteJson(Configuration configuration, @NonNull String url, @NonNull String json,
+                                                 @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
+        }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return subscribe(config.service.delete(url, requestBody, config.headers), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求，body是json。同步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteJson(Configuration configuration, @NonNull String url, @NonNull String json,
+                                                           @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers == null) {
+            config.headers = new HashMap<>();
+        }
+        config.headers.put("Content-Type", "application/json;charset=utf-8");
+        config.headers.put("Accept", "application/json;");
+        return handleSyncResponse(config.service.deleteSync(url, requestBody, config.headers), converter, config);
+    }
+
+    /**
+     * DELETE请求，body是字符串。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDeleteText(@NonNull String url, @NonNull String text,
+                                             RequestCallback<ResponseBody> callback) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url, requestBody), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求，body是字符串。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteText(@NonNull String url, @NonNull String text) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url, requestBody), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求，body是字符串。异步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static Disposable enqueueDeleteText(Configuration configuration, @NonNull String url, @NonNull String text,
+                                             RequestCallback<ResponseBody> callback) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, requestBody, config.headers), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.delete(url, requestBody), new NothingConverter(), config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，body是字符串。同步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteText(Configuration configuration, @NonNull String url,
+                                                                  @NonNull String text) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, requestBody, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url, requestBody), new NothingConverter(), config);
+        }
+    }
+
+    /**
+     * DELETE请求，body是字符串。异步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteText(@NonNull String url, @NonNull String text,
+                                                 @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url, requestBody), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求，body是字符串。同步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteText(@NonNull String url, @NonNull String text,
+                                                           @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url, requestBody), converter, config);
+    }
+
+    /**
+     * DELETE请求，body是字符串。异步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteText(Configuration configuration, @NonNull String url, @NonNull String text,
+                                                 @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, requestBody, config.headers), converter, config, callback);
+        } else {
+            return subscribe(config.service.delete(url, requestBody), converter, config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，body是字符串。同步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteText(Configuration configuration, @NonNull String url, @NonNull String text,
+                                                           @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain;charset=utf-8"), text);
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, requestBody, config.headers), converter, config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url, requestBody), converter, config);
+        }
+    }
+
+    /**
+     * DELETE提交表单。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDelete(@NonNull String url, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE提交表单。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDelete(@NonNull String url) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE提交表单。异步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static Disposable enqueueDelete(Configuration configuration, @NonNull String url, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, config.headers), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.delete(url), new NothingConverter(), config, callback);
+        }
+    }
+
+    /**
+     * DELETE提交表单。同步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDelete(Configuration configuration, @NonNull String url) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, config.headers), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url), new NothingConverter(), config);
+        }
+    }
+
+    /**
+     * DELETE提交表单。异步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDelete(@NonNull String url, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.delete(url), converter, config, callback);
+    }
+
+    /**
+     * DELETE提交表单。同步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDelete(@NonNull String url, @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteSync(url), converter, config);
+    }
+
+    /**
+     * DELETE。异步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDelete(Configuration configuration, @NonNull String url,
+                                                 @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, config.headers), converter, config, callback);
+        } else {
+            return subscribe(config.service.delete(url), converter, config, callback);
+        }
+    }
+
+    /**
+     * DELETE。同步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDelete(Configuration configuration, @NonNull String url,
+                                                           @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, config.headers), converter, config);
+        } else {
+            return handleSyncResponse(config.service.deleteSync(url), converter, config);
+        }
+    }
+
+    /**
+     * DELETE请求。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDeleteParams(@NonNull String url, @NonNull Map<String, Object> params,
+                                                 RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.deleteParams(url, params), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteParams(@NonNull String url, @NonNull Map<String, Object> params) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteParamsSync(url, params), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求。异步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static Disposable enqueueDeleteParams(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                 RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.deleteParams(url, config.headers, params), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.deleteParams(url, params), new NothingConverter(), config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求。同步的
+     *
+     * @param configuration 配置
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteParams(Configuration configuration, @NonNull String url,
+                                                                      @NonNull Map<String, Object> params) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteParamsSync(url, config.headers, params), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.deleteParamsSync(url, params), new NothingConverter(), config);
+        }
+    }
+
+    /**
+     * DELETE请求。异步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteParams(@NonNull String url, @NonNull Map<String, Object> params,
+                                                     @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.deleteParams(url, params), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求。同步的
+     *
+     * @param converter 响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteParams(@NonNull String url, @NonNull Map<String, Object> params,
+                                                               @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteParamsSync(url, params), converter, config);
+    }
+
+    /**
+     * DELETE请求。异步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteParams(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                     @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.deleteParams(url, config.headers, params), converter, config, callback);
+        } else {
+            return subscribe(config.service.deleteParams(url, params), converter, config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求。同步的
+     *
+     * @param configuration 配置
+     * @param converter     响应体转换器
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteParams(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                               @NonNull Converter<ResponseBody, T> converter) {
+        Objects.requireNonNull(converter, "converter can't be null");
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteParamsSync(url, config.headers, params), converter, config);
+        } else {
+            return handleSyncResponse(config.service.deleteParamsSync(url, params), converter, config);
+        }
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDeleteParamsAndBody(@NonNull String url, @NonNull Map<String, Object> params,
+                                                        @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.deleteParamsAndBody(url, params, body), new NothingConverter(), config, callback);
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteParamsAndBody(@NonNull String url, @NonNull Map<String, Object> params,
+                                                                             @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteParamsAndBodySync(url, params, body), new NothingConverter(), config);
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static Disposable enqueueDeleteParamsAndBody(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                        @NonNull RequestBody body, RequestCallback<ResponseBody> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, config.headers, params, body), new NothingConverter(), config, callback);
+        } else {
+            return subscribe(config.service.deleteParamsAndBody(url, params, body), new NothingConverter(), config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static ConvertedResponse<ResponseBody> executeDeleteParamsAndBody(Configuration configuration, @NonNull String url,
+                                                                             @NonNull Map<String, Object> params, @NonNull RequestBody body) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, config.headers, params, body), new NothingConverter(), config);
+        } else {
+            return handleSyncResponse(config.service.deleteParamsAndBodySync(url, params, body), new NothingConverter(), config);
+        }
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteParamsAndBody(@NonNull String url, @NonNull Map<String, Object> params, @NonNull RequestBody body,
+                                                            @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, null);
+        return subscribe(config.service.deleteParamsAndBody(url, params, body), converter, config, callback);
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteParamsAndBody(@NonNull String url, @NonNull Map<String, Object> params,
+                                                                      @NonNull RequestBody body, Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, null);
+        return handleSyncResponse(config.service.deleteParamsAndBodySync(url, params, body), converter, config);
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。异步的
+     */
+    @NonNull
+    public static <T> Disposable enqueueDeleteParamsAndBody(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                            @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter, RequestCallback<T> callback) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return subscribe(config.service.delete(url, config.headers, params, body), converter, config, callback);
+        } else {
+            return subscribe(config.service.deleteParamsAndBody(url, params, body), converter, config, callback);
+        }
+    }
+
+    /**
+     * DELETE请求，带参数，带请求体。同步的
+     */
+    @NonNull
+    public static <T> ConvertedResponse<T> executeDeleteParamsAndBody(Configuration configuration, @NonNull String url, @NonNull Map<String, Object> params,
+                                                                      @NonNull RequestBody body, @NonNull Converter<ResponseBody, T> converter) {
+        Configuration config = getConfiguration(url, configuration);
+        if (config.headers != null && !config.headers.isEmpty()) {
+            return handleSyncResponse(config.service.deleteSync(url, config.headers, params, body), converter, config);
+        } else {
+            return handleSyncResponse(config.service.deleteParamsAndBodySync(url, params, body), converter, config);
         }
     }
 }
