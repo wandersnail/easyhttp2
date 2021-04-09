@@ -66,7 +66,7 @@ public class SyncUploadWorker<T> {
         convertedResp = new ConvertedResponse<>(call);
         try {
             Response<ResponseBody> response = call.execute();
-            convertedResp.raw = response.raw();
+            convertedResp.response = response;
             if (response.isSuccessful() && info.converter != null && response.body() != null) {
                 try {
                     convertedResp.convertedResponse = info.converter.convert(response.body());

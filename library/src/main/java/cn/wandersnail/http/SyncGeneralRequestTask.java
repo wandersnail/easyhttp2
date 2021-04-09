@@ -28,13 +28,14 @@ class SyncGeneralRequestTask<T> {
                     }
                 }
                 //如果到了这里，说明超时了，取消请求
+                convertedResp.isCallTimeout = true;
                 call.cancel();
             });
         }
         try {
             Response<ResponseBody> response = call.execute();
             complete = true;
-            convertedResp.raw = response.raw();
+            convertedResp.response = response;
             if (response.isSuccessful()) {
                 try {
                     ResponseBody body = response.body();
