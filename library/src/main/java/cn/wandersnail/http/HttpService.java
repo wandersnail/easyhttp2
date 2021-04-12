@@ -36,6 +36,18 @@ public interface HttpService {
     Call<ResponseBody> getSync(@Url String url, @HeaderMap Map<String, String> headers);
 
     @POST
+    Observable<Response<ResponseBody>> post(@Url String url);
+
+    @POST
+    Call<ResponseBody> postSync(@Url String url);
+
+    @POST
+    Observable<Response<ResponseBody>> post(@Url String url, @HeaderMap Map<String, String> headers);
+
+    @POST
+    Call<ResponseBody> postSync(@Url String url, @HeaderMap Map<String, String> headers);
+    
+    @POST
     @FormUrlEncoded
     Observable<Response<ResponseBody>> postForm(@Url String url, @FieldMap Map<String, Object> params);
 

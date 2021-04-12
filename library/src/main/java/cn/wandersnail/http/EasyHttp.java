@@ -65,11 +65,25 @@ public class EasyHttp {
     public static <T> UploadWorkerBuilder<T> uploadWorkerBuilder() {
         return new UploadWorkerBuilder<>();
     }
+    
+    /**
+     * 异步上传
+     */
+    public static <T> UploadWorkerBuilder<T> uploadWorkerBuilder(Class<T> cls) {
+        return new UploadWorkerBuilder<>();
+    }
 
     /**
      * 同步上传
      */
     public static <T> SyncUploadWorkerBuilder<T> syncUploadWorkerBuilder() {
+        return new SyncUploadWorkerBuilder<>();
+    }
+
+    /**
+     * 同步上传
+     */
+    public static <T> SyncUploadWorkerBuilder<T> syncUploadWorkerBuilder(Class<T> cls) {
         return new SyncUploadWorkerBuilder<>();
     }
 
@@ -81,9 +95,23 @@ public class EasyHttp {
     }
 
     /**
+     * GET请求器
+     */
+    public static <T> GetRequester<T> getRequester(Class<T> cls) {
+        return new GetRequester<>();
+    }
+
+    /**
      * POST请求器
      */
     public static <T> PostRequester<T> postRequester() {
+        return new PostRequester<>();
+    }
+
+    /**
+     * POST请求器
+     */
+    public static <T> PostRequester<T> postRequester(Class<T> cls) {
         return new PostRequester<>();
     }
 
@@ -92,5 +120,12 @@ public class EasyHttp {
      */
     public static <T> DeleteRequester<T> deleteRequester() {
         return new DeleteRequester<>();
-    }    
+    }
+
+    /**
+     * DELETE请求
+     */
+    public static <T> DeleteRequester<T> deleteRequester(Class<T> cls) {
+        return new DeleteRequester<>();
+    }
 }

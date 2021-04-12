@@ -97,6 +97,8 @@ public class PostRequester<T> extends Requester<T> {
                 }
             } else if (body != null) {
                 return execute(configuration.service.postSync(url, configuration.headers, body));
+            } else {
+                return execute(configuration.service.postSync(url, configuration.headers));
             }
         } else {
             if (params != null) {
@@ -107,9 +109,10 @@ public class PostRequester<T> extends Requester<T> {
                 }
             } else if (body != null) {
                 return execute(configuration.service.postSync(url, body));
+            } else {
+                return execute(configuration.service.postSync(url));
             }
         }
-        return null;
     }
 
     @Override
@@ -131,6 +134,8 @@ public class PostRequester<T> extends Requester<T> {
                 }
             } else if (body != null) {
                 return enqueue(configuration.service.post(url, configuration.headers, body), callback);
+            } else {
+                return enqueue(configuration.service.post(url, configuration.headers), callback);
             }
         } else {
             if (params != null) {
@@ -141,8 +146,9 @@ public class PostRequester<T> extends Requester<T> {
                 }
             } else if (body != null) {
                 return enqueue(configuration.service.post(url, body), callback);
+            } else {
+                return enqueue(configuration.service.post(url), callback);
             }
         }
-        return null;
     }
 }
