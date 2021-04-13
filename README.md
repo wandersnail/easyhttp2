@@ -1,6 +1,6 @@
 ## 代码托管
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp)
-[![Download](https://api.bintray.com/packages/wandersnail/androidx/easyhttp/images/download.svg) ](https://bintray.com/wandersnail/androidx/easyhttp/_latestVersion)
+[![Release](https://jitpack.io/v/wandersnail/easyhttp.svg)](https://jitpack.io/#wandersnail/easyhttp)
 
 ## 使用
 1. 因为使用了jdk8的一些特性，需要在module的build.gradle里添加如下配置：
