@@ -10,7 +10,7 @@ def lib_version = '2.1.0'
 def user_name = 'wandersnail'
 def lib_group = 'cn.wandersnail'
 def lib_artifact = 'easyhttp'
-def lib_packaging = 'aar'
+def lib_packaging = 'jar'
 def lib_description = 'http lib for Android'
 def lib_website = 'https://github.com/wandersnail/easyhttp'
 group = lib_group
@@ -66,15 +66,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-task classJar(type: Jar, dependsOn: ['assembleRelease', 'sourcesJar']) {
-    from(project.zipTree("${project.buildDir.absolutePath}/intermediates/runtime_library_classes/release/classes.jar"))
-    exclude '**/R.class', '**/R$*.class', '**/**/BuildConfig.class', '**/**/BuildConfig$*.class'
-}
-
 artifacts {
     archives sourcesJar
     archives javadocJar
-    archives classJar
 }
 
 Properties properties = new Properties()
