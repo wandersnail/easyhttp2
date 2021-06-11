@@ -3,7 +3,6 @@ package cn.wandersnail.http.factory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -14,7 +13,7 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class Tls12SocketFactory extends SSLSocketFactory {
     private static final String[] TLS_SUPPORT_VERSION = {"TLSv1.1", "TLSv1.2"};
-    private SSLSocketFactory delegate;
+    private final SSLSocketFactory delegate;
 
     public Tls12SocketFactory(SSLSocketFactory delegate) {
         this.delegate = delegate;
@@ -36,12 +35,12 @@ public class Tls12SocketFactory extends SSLSocketFactory {
     }
 
     @Override
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port) throws IOException {
         return patch(delegate.createSocket(host, port));
     }
 
     @Override
-    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
         return patch(delegate.createSocket(host, port, localHost, localPort));
     }
 

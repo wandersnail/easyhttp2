@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'signing'
 apply plugin: 'maven'
 
-def lib_version = '2.0.2'
+def lib_version = '2.1.0'
 def user_name = 'wandersnail'
 def lib_group = 'cn.wandersnail'
 def lib_artifact = 'easyhttp'
@@ -11,6 +11,7 @@ def lib_description = 'http lib for Android'
 def lib_website = 'https://github.com/wandersnail/easyhttp'
 group = lib_group
 version = lib_version
+archivesBaseName = lib_artifact
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -43,6 +44,7 @@ dependencies {
     compileOnly "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
     compileOnly "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     compileOnly "com.alibaba:fastjson:$fastjson_version"
+    compileOnly "com.google.code.gson:gson:$gson_version"
 }
 
 task sourcesJar(type: Jar) {
@@ -71,55 +73,54 @@ artifacts {
     archives classJar
 }
 
-publish {
-    repoName="androidx"//仓库名
-    userOrg = user_name //bintray.com用户名  
-    groupId = lib_group //jcenter上的路径  
-    artifactId = lib_artifact //项目名称  
-    publishVersion = lib_version //版本号  
-    desc = lib_description
-    website = lib_website
-}
+Properties properties = new Properties()
+InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream()
+properties.load(inputStream)
+def ossrhUsername = properties.containsKey('ossrhUsername') ? properties['ossrhUsername'] : ''
+def ossrhPassword = properties.containsKey('ossrhPassword') ? properties['ossrhPassword'] : ''
 
-if (project.getGradle().startParameter.taskNames.any { it.contains('bintrayUpload') }) {
-    gradle.taskGraph.whenReady { taskGraph ->
-        taskGraph.getAllTasks().find {
-            it.path == ":$project.name:generatePomFileForReleasePublication"
-        }.doLast {
-            file("build/publications/release/pom-default.xml").delete()
-            println 'Overriding pom-file to make sure we can sync to maven central!'
-            pom {
-                //noinspection GroovyAssignabilityCheck
-                project {
-                    name lib_artifact
-                    artifactId lib_artifact
-                    packaging lib_packaging
-                    description lib_description
-                    version lib_version
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            pom.project {
+                name lib_artifact
+                artifactId lib_artifact
+                packaging lib_packaging
+                description lib_description
+                version lib_version
+                url lib_website
+
+                scm {
                     url lib_website
+                    connection "scm:git:${lib_website}.git"
+                    developerConnection "scm:git:${lib_website}.git"
+                }
 
-                    scm {
-                        url lib_website
-                        connection "scm:git:${lib_website}.git"
-                        developerConnection "scm:git:${lib_website}.git"
-                    }
-
-                    licenses {
-                        license {
-                            name 'The Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id user_name
-                            name 'Zeng Fansheng'
-                            email 'bingmo977@qq.com'
-                        }
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
-            }.writeTo("build/publications/release/pom-default.xml")
+
+                developers {
+                    developer {
+                        id user_name
+                        name 'Zeng Fansheng'
+                        email 'bingmo977@qq.com'
+                    }
+                }
+            }
         }
     }
 }

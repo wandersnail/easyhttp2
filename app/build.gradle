@@ -37,7 +37,7 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
-    implementation 'cn.wandersnail:common-full:1.0.1'
+    implementation 'cn.wandersnail:commons-android:1.2.5'
     implementation 'cn.wandersnail:widget-generic:1.0.0'
     implementation 'cn.wandersnail:file-selector:1.0.1'
     implementation project(':library')

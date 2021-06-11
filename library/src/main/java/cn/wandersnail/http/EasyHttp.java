@@ -1,5 +1,9 @@
 package cn.wandersnail.http;
 
+import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +22,8 @@ import io.reactivex.plugins.RxJavaPlugins;
  * author: zengfansheng
  */
 public class EasyHttp {
-    static final ExecutorService executorService = Executors.newCachedThreadPool();
+    static final ExecutorService executorService = Executors.newCachedThreadPool();    
+    private static Gson gson;
 
     static {
         RxJavaPlugins.setErrorHandler(t -> {
@@ -45,6 +50,14 @@ public class EasyHttp {
         });
     }
 
+    @NonNull
+    public static Gson getGson() {
+        if (gson == null) {
+            gson = new Gson();
+        }
+        return gson;
+    }
+    
     /**
      * 单文件下载
      */
