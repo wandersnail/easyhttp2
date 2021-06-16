@@ -57,6 +57,10 @@ public class EasyHttp {
         }
         return gson;
     }
+
+    public static void setGson(Gson gson) {
+        EasyHttp.gson = gson;
+    }
     
     /**
      * 单文件下载
