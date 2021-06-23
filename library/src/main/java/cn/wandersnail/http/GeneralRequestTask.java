@@ -29,6 +29,10 @@ class GeneralRequestTask<T> {
                               Configuration configuration, RequestCallback<T> callback) {
         this.configuration = configuration;
         this.callback = callback;
+        doRequest(observable, converter, configuration, callback);
+    }
+    
+    private void doRequest(Observable<Response<ResponseBody>> observable, Converter<ResponseBody, T> converter, Configuration configuration, RequestCallback<T> callback) {
         Runnable timerRunnable = new TimerRunnable();
         //只有设置过超时才计
         if (configuration.callTimeout > 0) {
@@ -39,13 +43,13 @@ class GeneralRequestTask<T> {
                 .subscribe(response -> {
                     handleRequestOver(timerRunnable);
                     if (callback != null) {
-                        try {
+                        T successBody = null;
+                        if (response.isSuccessful()) {
                             ResponseBody body = response.body();
-                            callback.onSuccess(response, body == null ? null : (converter == null ? (T) body : converter.convert(body)));
-                        } catch (Throwable t) {
-                            callback.onConvertError(t);
-                            callback.onSuccess(response, null);
+                            successBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
+                            callback.onSuccess(response, successBody);
                         }
+                        callback.onResponse(response, successBody, response.errorBody());
                     }
                 }, throwable -> {
                     handleRequestOver(timerRunnable);
