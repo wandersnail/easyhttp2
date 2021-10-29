@@ -35,7 +35,13 @@ abstract class Requester<T> {
     
     protected void handleConfiguration(String url, Configuration configuration) {
         String baseUrl = HttpUtils.getBaseUrl(url);
-        Configuration config = configuration == null ? new Configuration() : configuration;
+        Configuration config = configuration;
+        if (config == null) {
+            GlobalConfiguration globalConfig = EasyHttp.getInstance().getGlobalConfiguration();
+            config = new Configuration();
+            config.bypassAuth = globalConfig.bypassAuth;
+            config.callTimeout = globalConfig.callTimeout;
+        }
         if (config.retrofit == null) {
             int timeout = config.callTimeout > 0 ? config.callTimeout : 5;
             OkHttpClient client = HttpUtils.initHttpsClient(config.bypassAuth, new OkHttpClient.Builder())

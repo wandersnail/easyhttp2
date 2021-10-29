@@ -35,14 +35,27 @@ public class DownloadWorkerBuilder {
     }
 
     /**
+     * 设置下载文件信息
+     *
+     * @param info 下载文件信息
+     */
+    public DownloadWorkerBuilder setFileInfo(@NonNull DownloadInfo info) {
+        this.info = info;
+        return this;
+    }
+
+    /**
      * 设置下载进度监听
      */
     public DownloadWorkerBuilder setListener(DownloadListener<DownloadInfo> listener) {
         this.listener = listener;
         return this;
     }
-    
-    public DownloadWorker<DownloadInfo> build() {
+
+    /**
+     * 开始下载
+     */
+    public DownloadWorker<DownloadInfo> buildAndDownload() {
         return new DownloadWorker<>(info, listener);
     }
 }

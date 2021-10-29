@@ -32,7 +32,15 @@ public class MultiDownloadWorkerBuilder {
      * @param savePath 文件保存路径
      */
     public MultiDownloadWorkerBuilder addFileInfo(@NonNull String tag, @NonNull String url, @NonNull String savePath) {
-        DownloadInfo info = new DownloadInfo(tag, url, savePath);
+        return addFileInfo(new DownloadInfo(tag, url, savePath));
+    }
+
+    /**
+     * 添加下载文件信息
+     *
+     * @param info 下载文件信息
+     */
+    public MultiDownloadWorkerBuilder addFileInfo(@NonNull DownloadInfo info) {
         if (!infoList.contains(info)) {
             infoList.add(info);
         }
@@ -47,7 +55,10 @@ public class MultiDownloadWorkerBuilder {
         return this;
     }
 
-    public DownloadWorker<DownloadInfo> build() {
+    /**
+     * 开始下载
+     */
+    public DownloadWorker<DownloadInfo> buildAndDownload() {
         return new DownloadWorker<>(infoList, listener);
     }
 }

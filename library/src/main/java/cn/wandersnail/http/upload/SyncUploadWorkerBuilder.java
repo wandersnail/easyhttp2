@@ -72,7 +72,10 @@ public class SyncUploadWorkerBuilder<T> {
         return this;
     }
 
-    public SyncUploadWorker<T> build() {
+    /**
+     * 开始上传
+     */
+    public SyncUploadWorker<T> buildAndUpload() {
         UploadInfo<T> info;
         if (tag == null || tag.length() == 0) {
             info = new UploadInfo<>(url);

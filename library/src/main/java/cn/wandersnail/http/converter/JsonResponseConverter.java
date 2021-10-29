@@ -20,11 +20,12 @@ import retrofit2.Converter;
 public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
     private final Class<T> cls;
     private final JsonParser<T> parser;
-    private JsonParserType parserType = JsonParserType.FASTJSON;
+    private final JsonParserType parserType;
 
     public JsonResponseConverter(@NonNull Class<T> cls) {
         this.cls = cls;
         parser = null;
+        parserType = EasyHttp.getInstance().getGlobalConfiguration().jsonParserType;
     }
 
     public JsonResponseConverter(@NonNull Class<T> cls, @NonNull JsonParserType parserType) {
@@ -35,6 +36,7 @@ public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
     
     public JsonResponseConverter(@NonNull JsonParser<T> parser) {
         this.parser = parser;
+        parserType = EasyHttp.getInstance().getGlobalConfiguration().jsonParserType;
         cls = null;
     }
     
@@ -48,7 +50,7 @@ public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
             if (parser != null) {
                 return parser.parse(value.string());
             } else if (parserType == JsonParserType.GSON) {
-                return EasyHttp.getGson().fromJson(value.string(), cls);
+                return EasyHttp.getInstance().getGson().fromJson(value.string(), cls);
             } else {
                 return JSON.parseObject(value.string(), cls);
             }

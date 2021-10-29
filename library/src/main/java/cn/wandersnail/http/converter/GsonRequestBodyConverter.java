@@ -1,5 +1,7 @@
 package cn.wandersnail.http.converter;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 
 import cn.wandersnail.http.EasyHttp;
@@ -16,8 +18,8 @@ import retrofit2.Converter;
 public class GsonRequestBodyConverter implements Converter<Object, RequestBody> {
 
     @Override
-    public RequestBody convert(Object value) throws IOException {
+    public RequestBody convert(@NonNull Object value) throws IOException {
         MediaType mediaType = MediaType.parse("application/json; charset=UTF-8");
-        return RequestBody.create(mediaType, EasyHttp.getGson().toJson(value).getBytes());
+        return RequestBody.create(mediaType, EasyHttp.getInstance().getGson().toJson(value).getBytes());
     }
 }

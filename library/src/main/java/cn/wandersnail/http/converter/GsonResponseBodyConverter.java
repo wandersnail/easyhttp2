@@ -27,6 +27,6 @@ public class GsonResponseBodyConverter implements Converter<ResponseBody, Object
         BufferedSource bufferedSource = Okio.buffer(value.source());
         String tempStr = bufferedSource.readUtf8();
         bufferedSource.close();
-        return EasyHttp.getGson().fromJson(tempStr, type);
+        return EasyHttp.getInstance().getGson().fromJson(tempStr, type);
     }
 }

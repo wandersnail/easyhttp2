@@ -72,7 +72,10 @@ public class UploadWorkerBuilder<T> {
         return this;
     }
 
-    public UploadWorker<T> build() {
+    /**
+     * 开始上传
+     */
+    public UploadWorker<T> buildAndUpload() {
         UploadInfo<T> info;
         if (tag == null || tag.length() == 0) {
             info = new UploadInfo<>(url);

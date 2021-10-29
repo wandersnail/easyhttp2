@@ -22,8 +22,10 @@ import io.reactivex.plugins.RxJavaPlugins;
  * author: zengfansheng
  */
 public class EasyHttp {
+    private static EasyHttp instance;
     static final ExecutorService executorService = Executors.newCachedThreadPool();    
-    private static Gson gson;
+    private Gson gson;
+    private final GlobalConfiguration globalConfiguration = new GlobalConfiguration();
 
     static {
         RxJavaPlugins.setErrorHandler(t -> {
@@ -38,28 +40,45 @@ public class EasyHttp {
                 // fine, some blocking code was interrupted by a dispose call
                 return;
             }
-            if (t instanceof NullPointerException || t instanceof IllegalArgumentException) {
+            Thread.UncaughtExceptionHandler exceptionHandler = Thread.currentThread().getUncaughtExceptionHandler();
+            if (exceptionHandler != null && (t instanceof NullPointerException || t instanceof IllegalArgumentException)) {
                 // that's likely a bug in the application
-                Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), t);
+                exceptionHandler.uncaughtException(Thread.currentThread(), t);
                 return;
             }
-            if (t instanceof IllegalStateException) {
+            if (exceptionHandler != null && t instanceof IllegalStateException) {
                 // that's a bug in RxJava or in a custom operator
-                Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), t);
+                exceptionHandler.uncaughtException(Thread.currentThread(), t);
             }
         });
     }
 
+    public static EasyHttp getInstance() {
+        if (instance == null) {
+            synchronized (EasyHttp.class) {
+                if (instance == null) {
+                    instance = new EasyHttp();
+                }
+            }
+        }
+        return instance;
+    }
+
     @NonNull
-    public static Gson getGson() {
+    public Gson getGson() {
         if (gson == null) {
             gson = new Gson();
         }
         return gson;
     }
 
-    public static void setGson(Gson gson) {
-        EasyHttp.gson = gson;
+    @NonNull
+    public GlobalConfiguration getGlobalConfiguration() {
+        return globalConfiguration;
+    }
+
+    public void setGson(Gson gson) {
+        this.gson = gson;
     }
     
     /**

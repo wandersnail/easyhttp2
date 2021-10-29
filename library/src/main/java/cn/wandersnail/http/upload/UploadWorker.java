@@ -43,7 +43,7 @@ public class UploadWorker<T> implements Disposable {
         }
         for (FileInfo fileInfo : info.fileInfos) {
             try {
-                MultipartBody.Part part = MultipartBody.Part.createFormData(fileInfo.getFromDataName(),
+                MultipartBody.Part part = MultipartBody.Part.createFormData(fileInfo.getFormDataName(),
                         URLEncoder.encode(fileInfo.getFilename(), "utf-8"),
                         new ProgressRequestBody(MediaType.parse("multipart/form-data"), fileInfo.getFilename(),
                                 fileInfo.getInputStream(), observer));
