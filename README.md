@@ -1,3 +1,6 @@
+## 学习提高
+[![](https://img.shields.io/badge/下载-java、python、vue、js、c++等各种视频教程-blue.svg)](https://p.zhekou.life)
+
 ## 代码托管
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp)
 [![Release](https://jitpack.io/v/wandersnail/easyhttp.svg)](https://jitpack.io/#wandersnail/easyhttp)
