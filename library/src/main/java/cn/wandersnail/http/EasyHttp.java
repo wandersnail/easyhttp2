@@ -22,7 +22,6 @@ import io.reactivex.plugins.RxJavaPlugins;
  * author: zengfansheng
  */
 public class EasyHttp {
-    private static EasyHttp instance;
     static final ExecutorService executorService = Executors.newCachedThreadPool();    
     private Gson gson;
     private final GlobalConfiguration globalConfiguration = new GlobalConfiguration();
@@ -53,15 +52,12 @@ public class EasyHttp {
         });
     }
 
+    private static final class InstanceHolder {
+        static final EasyHttp instance = new EasyHttp();
+    }
+
     public static EasyHttp getInstance() {
-        if (instance == null) {
-            synchronized (EasyHttp.class) {
-                if (instance == null) {
-                    instance = new EasyHttp();
-                }
-            }
-        }
-        return instance;
+        return InstanceHolder.instance;
     }
 
     @NonNull

@@ -49,13 +49,44 @@ public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
         try {
             if (parser != null) {
                 return parser.parse(value.string());
-            } else if (parserType == JsonParserType.GSON) {
+            } else if (parserType == JsonParserType.FASTJSON2 && isFastjson2Supported()) {
+                return JSON.parseObject(value.string(), cls);
+            } else if (parserType == JsonParserType.FASTJSON && isFastjsonSupported()) {
+                return com.alibaba.fastjson.JSON.parseObject(value.string(), cls);
+            } else if (parserType == JsonParserType.GSON && isGsonSupported()) {
                 return EasyHttp.getInstance().getGson().fromJson(value.string(), cls);
             } else {
-                return JSON.parseObject(value.string(), cls);
+                throw new ConvertException("没有可用的Body转换器");
             }
         } catch (Throwable e) {
             throw new ConvertException(e.getMessage(), e);
         }
+    }
+
+    private boolean isFastjsonSupported() {
+        try {
+            Class.forName("com.alibaba.fastjson.JSON");
+            return true;
+        } catch (ClassNotFoundException ignore) {
+        }
+        return false;
+    }
+
+    private boolean isFastjson2Supported() {
+        try {
+            Class.forName("com.alibaba.fastjson2.JSON");
+            return true;
+        } catch (ClassNotFoundException ignore) {
+        }
+        return false;
+    }
+
+    private boolean isGsonSupported() {
+        try {
+            Class.forName("com.google.gson.Gson");
+            return true;
+        } catch (ClassNotFoundException ignore) {
+        }
+        return false;
     }
 }

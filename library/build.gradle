@@ -6,7 +6,7 @@ signing {
     sign configurations.archives
 }
 
-def lib_version = '2.3.0'
+def lib_version = '2.4.0'
 def user_name = 'wandersnail'
 def lib_group = 'cn.wandersnail'
 def lib_artifact = 'easyhttp'
@@ -48,6 +48,7 @@ dependencies {
     compileOnly "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
     compileOnly "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     compileOnly "com.alibaba:fastjson:$fastjson_version"
+    compileOnly 'com.alibaba.fastjson2:fastjson2:2.0.19.android'
     compileOnly "com.google.code.gson:gson:$gson_version"
 }
 
@@ -56,19 +57,8 @@ task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    setClasspath(classpath + project.files(android.getBootClasspath().join(File.pathSeparator)))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
 artifacts {
     archives sourcesJar
-    archives javadocJar
 }
 
 Properties properties = new Properties()
