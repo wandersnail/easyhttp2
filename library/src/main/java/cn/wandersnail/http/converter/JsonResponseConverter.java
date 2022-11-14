@@ -2,9 +2,6 @@ package cn.wandersnail.http.converter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.alibaba.fastjson.JSON;
-
 import cn.wandersnail.http.EasyHttp;
 import cn.wandersnail.http.callback.JsonParser;
 import cn.wandersnail.http.exception.ConvertException;
@@ -50,7 +47,7 @@ public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
             if (parser != null) {
                 return parser.parse(value.string());
             } else if (parserType == JsonParserType.FASTJSON2 && isFastjson2Supported()) {
-                return JSON.parseObject(value.string(), cls);
+                return com.alibaba.fastjson2.JSON.parseObject(value.string(), cls);
             } else if (parserType == JsonParserType.FASTJSON && isFastjsonSupported()) {
                 return com.alibaba.fastjson.JSON.parseObject(value.string(), cls);
             } else if (parserType == JsonParserType.GSON && isGsonSupported()) {
