@@ -2,6 +2,7 @@ package cn.wandersnail.http.converter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import cn.wandersnail.http.EasyHttp;
 import cn.wandersnail.http.callback.JsonParser;
 import cn.wandersnail.http.exception.ConvertException;
@@ -52,6 +53,12 @@ public class JsonResponseConverter<T> implements Converter<ResponseBody, T> {
                 return com.alibaba.fastjson.JSON.parseObject(value.string(), cls);
             } else if (parserType == JsonParserType.GSON && isGsonSupported()) {
                 return EasyHttp.getInstance().getGson().fromJson(value.string(), cls);
+            } else if (isFastjson2Supported()) {
+                return com.alibaba.fastjson2.JSON.parseObject(value.string(), cls);
+            } else if (isGsonSupported()) {
+                return EasyHttp.getInstance().getGson().fromJson(value.string(), cls);
+            } else if (isFastjsonSupported()) {
+                return com.alibaba.fastjson.JSON.parseObject(value.string(), cls);
             } else {
                 throw new ConvertException("没有可用的Body转换器");
             }

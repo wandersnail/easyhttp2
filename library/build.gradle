@@ -6,7 +6,7 @@ signing {
     sign configurations.archives
 }
 
-def lib_version = '2.4.1'
+def lib_version = '2.4.2'
 def user_name = 'wandersnail'
 def lib_group = 'cn.wandersnail'
 def lib_artifact = 'easyhttp'
