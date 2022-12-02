@@ -10,5 +10,5 @@ public class GlobalConfiguration extends BaseConfiguration {
     /**
      * JSON解析器类型
      */
-    public JsonParserType jsonParserType = JsonParserType.FASTJSON2;
+    public JsonParserType jsonParserType = JsonParserType.GSON;
 }
