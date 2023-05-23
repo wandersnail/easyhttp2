@@ -85,8 +85,10 @@ public class DeleteRequester<T> extends Requester<T> {
             if (configuration.headers == null) {
                 configuration.headers = new HashMap<>();
             }
-            configuration.headers.put("Content-Type", "application/json;charset=utf-8");
-            configuration.headers.put("Accept", "application/json;");
+            Map<String, String> headers = configuration.headers;
+            if (headers.get("Content-Type") == null) {
+                headers.put("Content-Type", "application/json");
+            }
         }
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
             if (params != null) {
@@ -122,8 +124,10 @@ public class DeleteRequester<T> extends Requester<T> {
             if (configuration.headers == null) {
                 configuration.headers = new HashMap<>();
             }
-            configuration.headers.put("Content-Type", "application/json;charset=utf-8");
-            configuration.headers.put("Accept", "application/json;");
+            Map<String, String> headers = configuration.headers;
+            if (headers.get("Content-Type") == null) {
+                headers.put("Content-Type", "application/json");
+            }
         }
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
             if (params != null) {
