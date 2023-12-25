@@ -1,7 +1,9 @@
 package cn.wandersnail.http.upload;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 import cn.wandersnail.http.util.HttpUtils;
@@ -11,6 +13,7 @@ import io.reactivex.disposables.Disposable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -28,29 +31,25 @@ public class UploadWorker<T> implements Disposable {
     public UploadWorker(UploadInfo<T> info, UploadListener<T> listener) {
         observer = new UploadObserver<>(info, listener);
         Retrofit.Builder builder = new Retrofit.Builder();
-        if (info.client != null) {
+        if (info.client == null) {
             builder.client(HttpUtils.initHttpsClient(true, new OkHttpClient.Builder()).build());
+        } else {
+            builder.client(info.client);
         }
         UploadService service = builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .baseUrl(info.getBaseUrl())
                 .build()
                 .create(UploadService.class);
         MultipartBody.Builder bodyBuilder = new MultipartBody.Builder();
+        bodyBuilder.setType(MultipartBody.FORM);
         if (info.paramParts != null) {
             for (Map.Entry<String, String> entry : info.paramParts.entrySet()) {
                 bodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
             }
         }
         for (FileInfo fileInfo : info.fileInfos) {
-            try {
-                MultipartBody.Part part = MultipartBody.Part.createFormData(fileInfo.getFormDataName(),
-                        URLEncoder.encode(fileInfo.getFilename(), "utf-8"),
-                        new ProgressRequestBody(MediaType.parse("multipart/form-data"), fileInfo.getFilename(),
-                                fileInfo.getInputStream(), observer));
-                bodyBuilder.addPart(part);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            ProgressRequestBody body = new ProgressRequestBody(fileInfo.getMediaType(), fileInfo, observer);
+            bodyBuilder.addFormDataPart(fileInfo.getFormDataName(), fileInfo.getFilename(), body);
         }
         Observable<Response<ResponseBody>> observable;
         if (info.headers == null || info.headers.isEmpty()) {

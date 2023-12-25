@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="m">
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -34,7 +35,7 @@
             android:name=".GeneralRequestActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
         <activity
-            android:name=".SingleUploadActivity"
+            android:name=".UploadActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
     </application>
 

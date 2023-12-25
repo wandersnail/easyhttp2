@@ -17,12 +17,12 @@ import retrofit2.Response;
  * author: zengfansheng
  */
 class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable, UploadProgressListener {
-    private static final int UPDATE_LIMIT_DURATION = 500;//限制进度更新频率，毫秒
+    private static final int UPDATE_LIMIT_DURATION = 100;//限制进度更新频率，毫秒
     private final UploadInfo<T> info;
     private final UploadListener<T> listener;
     private Disposable disposable;
     private long lastUpdateTime;//上次进度更新时间
-    private final Map<String, Long> contentLengthMap = new HashMap<>();
+    private final Map<FileInfo, Long> contentLengthMap = new HashMap<>();
 
     UploadObserver(@NonNull UploadInfo<T> info, UploadListener<T> listener) {
         this.info = info;
@@ -30,14 +30,14 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
     }
 
     @Override
-    public void onProgress(String filename, long progress, long max) {
+    public void onProgress(FileInfo fileInfo, long progress, long max) {
         AndroidSchedulers.mainThread().scheduleDirect(() -> {
             long completionLength = progress;
-            Long contentLen = contentLengthMap.get(filename);
+            Long contentLen = contentLengthMap.get(fileInfo);
             if (contentLen != null && contentLen > max) {
                 completionLength += contentLen - max;
             } else {
-                contentLengthMap.put(filename, max);
+                contentLengthMap.put(fileInfo, max);
                 contentLen = max;
             }
             if (System.currentTimeMillis() - lastUpdateTime >= UPDATE_LIMIT_DURATION && (info.state == TaskInfo.State.IDLE ||
@@ -49,7 +49,7 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
                     }
                 }
                 if (listener != null) {
-                    listener.onProgress(filename, completionLength, contentLen);
+                    listener.onProgress(fileInfo, completionLength, contentLen);
                 }
                 lastUpdateTime = System.currentTimeMillis();
             }
@@ -70,8 +70,10 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
         if (listener != null) {
             if (info.converter != null) {
                 try {
-                    T convertedBody = info.converter.convert(response.body());
+                    ResponseBody body = response.body();
+                    T convertedBody = info.converter.convert(body);
                     listener.onResponseBodyParse(response, convertedBody);
+                    body.close();
                 } catch (Exception e) {
                     listener.onConvertError(e);
                     listener.onResponseBodyParse(response, null);
@@ -95,7 +97,7 @@ class UploadObserver<T> implements Observer<Response<ResponseBody>>, Disposable,
     public void onComplete() {
         disposable = null;
         if (listener != null) {
-            for (Map.Entry<String, Long> entry : contentLengthMap.entrySet()) {
+            for (Map.Entry<FileInfo, Long> entry : contentLengthMap.entrySet()) {
                 listener.onProgress(entry.getKey(), entry.getValue(), entry.getValue());
             }
         }

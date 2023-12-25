@@ -1,6 +1,9 @@
 package cn.wandersnail.http.util;
 
+import android.webkit.MimeTypeMap;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -191,5 +194,14 @@ public class HttpUtils {
                 }
             }
         }
+    }
+
+    @Nullable
+    public static String getMimeType(@NonNull String filename) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
+        if (extension == null) {
+            return null;
+        }
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
 }

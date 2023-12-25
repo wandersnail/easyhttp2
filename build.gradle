@@ -1,13 +1,15 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     ext {
-        compileSdkVersion = 29
+        compileSdkVersion = 31
         minSdkVersion = 19
         targetSdkVersion = 29
 
-        kotlin_version = '1.7.20'
-        appcompat_version = '1.1.0'
+        kotlin_version = '1.7.10'
+        appcompat_version = '1.4.1'
         retrofit2_version = '2.9.0'
         rxandroid_version = '2.1.1'
         rxkotlin_version = '2.4.0'
@@ -17,12 +19,12 @@ buildscript {
 
     repositories {
         google()
-        maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -32,23 +34,24 @@ buildscript {
 allprojects {
     repositories {
         google()
-        maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
     // 指定编码
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
     }
-    tasks.withType(Javadoc).all {
+    tasks.withType(Javadoc).configureEach {
+        enabled = false
         options {
             encoding "UTF-8"
             charSet 'UTF-8'
         }
         options.addStringOption('Xdoclint:none', '-quiet')
     }
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    tasks.withType(KotlinCompile).configureEach {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
 

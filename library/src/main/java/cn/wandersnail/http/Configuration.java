@@ -2,6 +2,7 @@ package cn.wandersnail.http;
 
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
@@ -19,5 +20,6 @@ public class Configuration extends BaseConfiguration {
      * 使用自定义的Retrofit
      */
     public Retrofit retrofit;
+    public OkHttpClient client;
     HttpService service;
 }

@@ -44,10 +44,13 @@ abstract class Requester<T> {
         }
         if (config.retrofit == null) {
             int timeout = config.callTimeout > 0 ? config.callTimeout : 5;
-            OkHttpClient client = HttpUtils.initHttpsClient(config.bypassAuth, new OkHttpClient.Builder())
-                    .readTimeout(timeout, TimeUnit.SECONDS)
-                    .connectTimeout(timeout, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient client = config.client;
+            if (client == null) {
+                client = HttpUtils.initHttpsClient(config.bypassAuth, new OkHttpClient.Builder())
+                        .readTimeout(timeout, TimeUnit.SECONDS)
+                        .connectTimeout(timeout, TimeUnit.SECONDS)
+                        .build();
+            }
             config.retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

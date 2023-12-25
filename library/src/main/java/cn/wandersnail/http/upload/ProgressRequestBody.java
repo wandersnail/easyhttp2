@@ -1,5 +1,9 @@
 package cn.wandersnail.http.upload;
 
+import androidx.annotation.NonNull;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -14,14 +18,12 @@ import okio.BufferedSink;
  */
 class ProgressRequestBody extends RequestBody {
     private final MediaType contentType;
-    private final String filename;
-    private final InputStream inputStream;
+    private final FileInfo fileInfo;
     private final UploadProgressListener listener;
 
-    ProgressRequestBody(MediaType contentType, String filename, InputStream inputStream, UploadProgressListener listener) {
+    ProgressRequestBody(MediaType contentType, FileInfo fileInfo, UploadProgressListener listener) {
         this.contentType = contentType;
-        this.filename = filename;
-        this.inputStream = inputStream;
+        this.fileInfo = fileInfo;
         this.listener = listener;
     }
 
@@ -31,16 +33,27 @@ class ProgressRequestBody extends RequestBody {
     }
 
     @Override
-    public void writeTo(BufferedSink sink) throws IOException {
+    public long contentLength() throws IOException {
+        return fileInfo.getFile() == null ? fileInfo.getInputStream().available() : fileInfo.getFile().length();
+    }
+
+    @Override
+    public void writeTo(@NonNull BufferedSink sink) throws IOException {
         long uploadCount = 0;
+        InputStream inputStream = null;
         try {
             byte[] buffer = new byte[10240];
             int len;
+            if (fileInfo.getFile() != null) {
+                inputStream = new FileInputStream(fileInfo.getFile());
+            } else {
+                inputStream = fileInfo.getInputStream();
+            }
             while ((len = inputStream.read(buffer)) != -1) {
                 sink.write(buffer, 0, len);
                 uploadCount += len;
                 if (listener != null) {
-                    listener.onProgress(filename, uploadCount, contentLength());
+                    listener.onProgress(fileInfo, uploadCount, contentLength());
                 }
             }
         } finally {

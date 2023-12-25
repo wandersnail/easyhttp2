@@ -12,9 +12,9 @@ import java.io.File
  * 作者: zengfansheng
  */
 class App : Application() {
+
     override fun onCreate() {
         super.onCreate()
         AppHolder.initialize(this)
-        CrashHandler(this, File(Environment.getExternalStorageDirectory(), "network-requester/crash.txt"), null)
     }
 }
