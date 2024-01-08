@@ -200,7 +200,12 @@ public class HttpUtils {
     public static String getMimeType(@NonNull String filename) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
         if (extension == null) {
-            return null;
+            int index = filename.lastIndexOf(".");
+            if (index >= 0) {
+                extension = filename.substring(index + 1);
+            } else {
+                return null;
+            }
         }
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
