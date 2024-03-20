@@ -47,7 +47,7 @@ public class DownloadWorkerBuilder {
     /**
      * 设置下载进度监听
      */
-    public DownloadWorkerBuilder setListener(DownloadListener<DownloadInfo> listener) {
+    public DownloadWorkerBuilder setListener(@NonNull DownloadListener<DownloadInfo> listener) {
         this.listener = listener;
         return this;
     }

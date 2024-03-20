@@ -28,8 +28,9 @@ class MainActivity : AppCompatActivity() {
                 ToastUtils.showShort("部分权限被拒绝，可能造成某些功能无法使用")
             }
         }
-        val items = mutableListOf("文件上传")
-        val itemClassList = mutableListOf(UploadActivity::class.java)
+        val items = mutableListOf("文件上传", "下载", "普通请求")
+        val itemClassList = mutableListOf(UploadActivity::class.java, DownloadActivity::class.java,
+            GeneralRequestActivity::class.java)
         val adapter = object : BaseListAdapter<String>(this, items) {
             override fun createViewHolder(position: Int): BaseViewHolder<String> {
                 return object : BaseViewHolder<String> {

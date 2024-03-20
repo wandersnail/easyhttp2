@@ -1,5 +1,7 @@
 package cn.wandersnail.http.download;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 
 import cn.wandersnail.http.callback.ProgressListener;
@@ -38,6 +40,7 @@ class ProgressResponseBody extends ResponseBody {
         return responseBody.contentLength();
     }
 
+    @NonNull
     @Override
     public BufferedSource source() {
         if (bufferedSource == null) {

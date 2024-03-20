@@ -1,5 +1,8 @@
 package cn.wandersnail.http.download;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import androidx.annotation.NonNull;
 
 import java.io.BufferedInputStream;
@@ -10,34 +13,30 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import cn.wandersnail.http.EasyHttp;
 import cn.wandersnail.http.TaskInfo;
 import cn.wandersnail.http.callback.ProgressListener;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import retrofit2.Response;
 
 /**
  * date: 2019/8/23 15:49
  * author: zengfansheng
  */
-class DownloadObserver<T extends DownloadInfo> implements Observer<Response<ResponseBody>>, ProgressListener {
+class DownloadController<T extends DownloadInfo> implements ProgressListener {
     private static final int UPDATE_LIMIT_DURATION = 500;//限制进度更新频率，毫秒
     private final T info;
     private final DownloadListener<T> listener;
-    private Disposable disposable;
+    private boolean isCancel;
     private long lastUpdateTime;//上次进度更新时间
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    DownloadObserver(@NonNull T info, DownloadListener<T> listener) {
+    DownloadController(@NonNull T info, DownloadListener<T> listener) {
         this.info = info;
         this.listener = listener;
     }
 
     @Override
     public void onProgress(long progress, long max) {
-        AndroidSchedulers.mainThread().scheduleDirect(() -> {
+        mainHandler.post(() -> {
             long completionLength = progress;
             if (info.contentLength > max) {
                 completionLength += info.contentLength - max;
@@ -59,33 +58,23 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
         });
     }
 
-    @Override
-    public void onSubscribe(Disposable d) {
-        disposable = d;
+    public void onStart() {
         info.state = TaskInfo.State.START;
         if (listener != null) {
-            listener.onStateChange(info, null);
+            mainHandler.post(()-> listener.onStateChange(info, null));
         }
     }
 
-    @Override
-    public void onNext(Response<ResponseBody> responseBodyResponse) {
-
-    }
-
-    @Override
     public void onError(Throwable e) {
-        disposable = null;
         info.state = TaskInfo.State.ERROR;
+        info.getTemporaryFile().delete();
         if (listener != null) {
-            listener.onStateChange(info, e);
+            mainHandler.post(()-> listener.onStateChange(info, e));
         }
     }
 
-    @Override
     public void onComplete() {
-        disposable = null;
-        Schedulers.io().scheduleDirect(() -> {
+        EasyHttp.executeOnIo(() -> {
             //将临时文件重命名为目标路径
             File destFile = new File(info.savePath);
             File parentFile = destFile.getParentFile();
@@ -102,7 +91,7 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
                 destFile.delete();
             }
             tempFile.delete();
-            AndroidSchedulers.mainThread().scheduleDirect(() -> {
+            mainHandler.post(() -> {
                 if (success) {
                     //更新进度
                     info.completionLength = info.contentLength;
@@ -155,27 +144,37 @@ class DownloadObserver<T extends DownloadInfo> implements Observer<Response<Resp
     
     private void updateProgress() {
         if (info.completionLength > 0 && info.contentLength > 0 && listener != null) {
-            listener.onProgress(info);
+            listener.onProgress(info, (int) (info.completionLength * 100 / info.contentLength));
         }
     }
-    
-    public void dispose(boolean cancel) {
-        AndroidSchedulers.mainThread().scheduleDirect(() -> {
-            if (disposable != null && !disposable.isDisposed()) {
-                disposable.dispose();
+
+    public boolean isCancel() {
+        return isCancel;
+    }
+
+    public void cancel() {
+        if (isCancel) {
+            return;
+        }
+        isCancel = true;
+        if (info.state != TaskInfo.State.CANCEL && info.state != TaskInfo.State.ERROR) {
+            info.state = TaskInfo.State.CANCEL;
+            info.getTemporaryFile().delete();
+            if (listener != null) {
+                listener.onStateChange(info, null);
             }
-            if (info.state == TaskInfo.State.ONGOING || info.state == TaskInfo.State.START) {
-                if (cancel) {
-                    info.state = TaskInfo.State.CANCEL;
-                    //如果取消，删除临时文件
-                    info.getTemporaryFile().delete();
-                } else {
-                    info.state = TaskInfo.State.PAUSE;
-                }
-                if (listener != null) {
-                    listener.onStateChange(info, null);
-                }
+        }
+    }
+
+    public void pause() {
+        if (isCancel) {
+            return;
+        }
+        if (info.state == TaskInfo.State.ONGOING || info.state == TaskInfo.State.START) {
+            info.state = TaskInfo.State.PAUSE;
+            if (listener != null) {
+                listener.onStateChange(info, null);
             }
-        });
+        }
     }
 }

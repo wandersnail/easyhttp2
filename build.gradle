@@ -8,9 +8,8 @@ buildscript {
         minSdkVersion = 19
         targetSdkVersion = 29
 
-        kotlin_version = '1.7.10'
         appcompat_version = '1.4.1'
-        retrofit2_version = '2.9.0'
+        retrofit2_version = '2.10.0'
         rxandroid_version = '2.1.1'
         rxkotlin_version = '2.4.0'
         fastjson_version = '1.1.71.android'
@@ -19,13 +18,13 @@ buildscript {
 
     repositories {
         google()
+        mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
         maven { url 'https://maven.aliyun.com/repository/central' }
-        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -34,9 +33,9 @@ buildscript {
 allprojects {
     repositories {
         google()
+        mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
         maven { url 'https://maven.aliyun.com/repository/central' }
-        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
     // 指定编码
@@ -50,13 +49,5 @@ allprojects {
             charSet 'UTF-8'
         }
         options.addStringOption('Xdoclint:none', '-quiet')
-    }
-    tasks.withType(KotlinCompile).configureEach {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-
-        kotlinOptions {
-            jvmTarget = '1.8'
-        }
     }
 }

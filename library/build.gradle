@@ -4,10 +4,10 @@ plugins {
     id 'signing'
 }
 
-def lib_version = '2.5.1'
+def lib_version = '1.0.0'
 def user_name = 'wandersnail'
 def lib_group = 'cn.wandersnail'
-def lib_artifact = 'easyhttp'
+def lib_artifact = 'easyhttp2'
 def lib_packaging = 'jar'
 def lib_description = 'http lib for Android'
 def lib_website = 'https://github.com/wandersnail/easyhttp'
@@ -16,10 +16,10 @@ version = lib_version
 
 android {
     namespace 'cn.wandersnail.http'
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName lib_version
     }
@@ -43,9 +43,6 @@ android {
 dependencies {
     compileOnly "androidx.appcompat:appcompat:$appcompat_version"
     compileOnly "com.squareup.retrofit2:retrofit:$retrofit2_version"
-    compileOnly "com.squareup.retrofit2:adapter-rxjava2:$retrofit2_version"
-    compileOnly "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
-    compileOnly "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     compileOnly "com.alibaba:fastjson:$fastjson_version"
     compileOnly 'com.alibaba.fastjson2:fastjson2:2.0.19.android'
     compileOnly "com.google.code.gson:gson:$gson_version"

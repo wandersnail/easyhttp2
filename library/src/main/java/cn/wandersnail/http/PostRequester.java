@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.wandersnail.http.callback.Cancelable;
 import cn.wandersnail.http.callback.RequestCallback;
-import io.reactivex.disposables.Disposable;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -93,32 +93,32 @@ public class PostRequester<T> extends Requester<T> {
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
             if (params != null) {
                 if (body != null) {
-                    return execute(configuration.service.postSync(url, configuration.headers, params, body));
+                    return execute(configuration.service.post(url, configuration.headers, params, body));
                 } else {
-                    return execute(configuration.service.postFormSync(url, configuration.headers, params));
+                    return execute(configuration.service.postForm(url, configuration.headers, params));
                 }
             } else if (body != null) {
-                return execute(configuration.service.postSync(url, configuration.headers, body));
+                return execute(configuration.service.post(url, configuration.headers, body));
             } else {
-                return execute(configuration.service.postSync(url, configuration.headers));
+                return execute(configuration.service.post(url, configuration.headers));
             }
         } else {
             if (params != null) {
                 if (body != null) {
-                    return execute(configuration.service.postParamsAndBodySync(url, params, body));
+                    return execute(configuration.service.postParamsAndBody(url, params, body));
                 } else {
-                    return execute(configuration.service.postFormSync(url, params));
+                    return execute(configuration.service.postForm(url, params));
                 }
             } else if (body != null) {
-                return execute(configuration.service.postSync(url, body));
+                return execute(configuration.service.post(url, body));
             } else {
-                return execute(configuration.service.postSync(url));
+                return execute(configuration.service.post(url));
             }
         }
     }
 
     @Override
-    public Disposable enqueue(RequestCallback<T> callback) {
+    public Cancelable enqueue(RequestCallback<T> callback) {
         handleConfiguration(url, configuration);
         if (isJsonBody) {
             if (configuration.headers == null) {

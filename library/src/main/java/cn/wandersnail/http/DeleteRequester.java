@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.wandersnail.http.callback.Cancelable;
 import cn.wandersnail.http.callback.RequestCallback;
-import io.reactivex.disposables.Disposable;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -93,32 +93,32 @@ public class DeleteRequester<T> extends Requester<T> {
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
             if (params != null) {
                 if (body != null) {
-                    return execute(configuration.service.deleteSync(url, configuration.headers, params, body));
+                    return execute(configuration.service.deleteParamsAndBody(url, configuration.headers, params, body));
                 } else {
-                    return execute(configuration.service.deleteParamsSync(url, configuration.headers, params));
+                    return execute(configuration.service.deleteParams(url, configuration.headers, params));
                 }
             } else if (body != null) {
-                return execute(configuration.service.deleteSync(url, configuration.headers, body));
+                return execute(configuration.service.delete(url, configuration.headers, body));
             } else {
-                return execute(configuration.service.deleteSync(url, configuration.headers));
+                return execute(configuration.service.delete(url, configuration.headers));
             }
         } else {
             if (params != null) {
                 if (body != null) {
-                    return execute(configuration.service.deleteParamsAndBodySync(url, params, body));
+                    return execute(configuration.service.deleteParamsAndBody(url, params, body));
                 } else {
-                    return execute(configuration.service.deleteParamsSync(url, params));
+                    return execute(configuration.service.deleteParams(url, params));
                 }
             } else if (body != null) {
-                return execute(configuration.service.deleteSync(url, body));
+                return execute(configuration.service.delete(url, body));
             } else {
-                return execute(configuration.service.deleteSync(url));
+                return execute(configuration.service.delete(url));
             }
         }
     }
 
     @Override
-    public Disposable enqueue(RequestCallback<T> callback) {
+    public Cancelable enqueue(RequestCallback<T> callback) {
         handleConfiguration(url, configuration);
         if (isJsonBody) {
             if (configuration.headers == null) {

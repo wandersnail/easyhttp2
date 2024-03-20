@@ -15,24 +15,9 @@
             android:minWidth="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/btnGetSync"
-            android:text="GET Sync"
-            android:textSize="12dp"
-            android:minWidth="0dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/btnPostJson"
             android:text="post Json"
-            android:textSize="12dp"
-            android:minWidth="0dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/btnPostText"
-            android:text="post text"
             android:textSize="12dp"
             android:minWidth="0dp"
             android:layout_width="wrap_content"
@@ -44,8 +29,15 @@
             android:minWidth="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/btnDelete"
+            android:text="delete"
+            android:textSize="12dp"
+            android:minWidth="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
-    
+
     <TextView
         android:text="响应数据:"
         android:layout_width="wrap_content"

@@ -1,5 +1,7 @@
 package cn.wandersnail.http.download;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -12,36 +14,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.wandersnail.http.EasyHttp;
 import cn.wandersnail.http.TaskInfo;
-import cn.wandersnail.http.exception.RetryWhenException;
 import cn.wandersnail.http.util.HttpUtils;
-import cn.wandersnail.http.util.SchedulerUtils;
-import io.reactivex.disposables.Disposable;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
  * date: 2019/8/23 16:17
  * author: zengfansheng
  */
-public class DownloadWorker<T extends DownloadInfo> implements Disposable {
-    private final Map<T, DownloadObserver<T>> taskMap = new ConcurrentHashMap<>();
+public class DownloadWorker<T extends DownloadInfo> {
+    private final Map<T, DownloadController<T>> taskMap = new ConcurrentHashMap<>();
     private final DownloadListener<T> listener;
     private int successNum;
     private int failureNum;
     private boolean isCanceled;
     private final int taskCount;
 
-    public DownloadWorker(@NonNull T info, DownloadListener<T> listener) {
+    public DownloadWorker(@NonNull T info, @Nullable DownloadListener<T> listener) {
         this.listener = listener;
         taskCount = 1;
         info.reset();
         execute(info);
     }
 
-    public DownloadWorker(@NonNull List<T> infoList, MultiDownloadListener<T> listener) {
+    public DownloadWorker(@NonNull List<T> infoList, @Nullable MultiDownloadListener<T> listener) {
         this.listener = listener;
         taskCount = infoList.size();
         for (T info : infoList) {
@@ -52,53 +54,65 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
     
     private void execute(T info) {
         //如果listener为空，说明不需要监听，不为空则在本地监听后，再传出去
-        DownloadObserver<T> observer = new DownloadObserver<>(info, listener == null ? null : new LocalTaskListener());
+        DownloadController<T> controller = new DownloadController<>(info, listener == null ? null : new LocalTaskListener());
         synchronized (this) {
-            taskMap.put(info, observer);
+            taskMap.put(info, controller);
         }
         OkHttpClient httpClient = HttpUtils.initHttpsClient(true, new OkHttpClient.Builder())
-                .addInterceptor(new ProgressInterceptor(observer))
+                .addInterceptor(new ProgressInterceptor(controller))
                 .build();
-        new Retrofit.Builder()
+        Call<ResponseBody> call = new Retrofit.Builder()
                 .client(httpClient)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .baseUrl(info.getBaseUrl())
                 .build()
                 .create(DownloadService.class)
-                .download("bytes=" + info.completionLength + "-", info.url)//断点续传
-                .retryWhen(new RetryWhenException())
-                .map(responseBodyResponse -> {
-                    writeToDisk(responseBodyResponse.body(), info.getTemporaryFile(), info);
-                    return responseBodyResponse;
-                })
-                .compose(SchedulerUtils.applyGeneralObservableSchedulers())
-                .subscribe(observer);
+                .download("bytes=" + info.completionLength + "-", info.url);//断点续传
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                EasyHttp.executeOnIo(()-> writeToDisk(response.body(), info.getTemporaryFile(), info, controller));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                controller.onError(t);
+            }
+        });
     }
 
     //写入文件在本地
-    private void writeToDisk(ResponseBody body, File file, T info) {
+    private void writeToDisk(ResponseBody body, File file, T info, DownloadController<T> controller) {
         if (body == null) {
+            controller.onError(new Throwable("body is null"));
             return;
         }
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
-        InputStream input = body.byteStream();
         long allLen = info.contentLength == 0 ? body.contentLength() : info.contentLength;
         RandomAccessFile accessFile = null;
         FileChannel channel = null;
+        InputStream input = null;
         try {
+            long readLen = 0;
+            input = body.byteStream();
             accessFile = new RandomAccessFile(file, "rwd");
             channel = accessFile.getChannel();
             MappedByteBuffer byteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, info.completionLength, 
                     allLen - info.completionLength);
             byte[] buffer = new byte[10240];
             int len;
-            while ((len = input.read(buffer)) != -1) {
+            controller.onStart();
+            while (!controller.isCancel() && (len = input.read(buffer)) != -1) {
                 byteBuffer.put(buffer, 0, len);
+                readLen += len;
+            }
+            if (allLen <= readLen) {
+                controller.onComplete();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("DownloadWorker", "文件保存失败：" + e.getMessage());
+            controller.onError(e);
         } finally {
             HttpUtils.closeQuietly(channel, accessFile, input);
         }
@@ -125,36 +139,21 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
         }
 
         @Override
-        public void onProgress(@NonNull T info) {
+        public void onProgress(@NonNull T info, int progress) {
             if (listener != null) {
-                listener.onProgress(info);
+                listener.onProgress(info, progress);
             }
         }
     }
-    
-    /**
-     * 取消所有下载
-     */
-    @Override
-    public void dispose() {
-        cancel();
-    }
 
-    /**
-     * 是否已取消
-     */
-    @Override
-    public boolean isDisposed() {
-        return false;
-    }
 
     /**
      * 取消单个下载
      */
     public synchronized void cancel(@NonNull T info) {
-        DownloadObserver<T> observer = taskMap.remove(info);
-        if (observer != null) {
-            observer.dispose(true);
+        DownloadController<T> controller = taskMap.remove(info);
+        if (controller != null) {
+            controller.cancel();
             if (taskMap.isEmpty()) {
                 isCanceled = true;
             }
@@ -166,8 +165,8 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
      */
     public synchronized void cancel() {
         if (!taskMap.isEmpty()) {
-            for (DownloadObserver<T> observer : taskMap.values()) {
-                observer.dispose(true);
+            for (DownloadController<T> controller : taskMap.values()) {
+                controller.cancel();
             }
             taskMap.clear();
             isCanceled = true;
@@ -219,9 +218,9 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
      * 暂停单个下载
      */
     public synchronized void pause(@NonNull T info) {
-        DownloadObserver<T> observer = taskMap.get(info);
-        if (observer != null) {
-            observer.dispose(false);
+        DownloadController<T> controller = taskMap.get(info);
+        if (controller != null) {
+            controller.pause();
         }
     }
 
@@ -229,8 +228,8 @@ public class DownloadWorker<T extends DownloadInfo> implements Disposable {
      * 暂停所有下载
      */
     public synchronized void pause() {
-        for (DownloadObserver<T> observer : taskMap.values()) {
-            observer.dispose(false);
+        for (DownloadController<T> controller : taskMap.values()) {
+            controller.pause();
         }
     }
 }

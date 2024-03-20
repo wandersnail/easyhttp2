@@ -1,23 +1,17 @@
 package cn.wandersnail.http.upload;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
+import androidx.annotation.NonNull;
+
 import java.util.Map;
 
 import cn.wandersnail.http.util.HttpUtils;
-import cn.wandersnail.http.util.SchedulerUtils;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
  * 上传执行
@@ -25,19 +19,20 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
  * date: 2019/8/23 21:41
  * author: zengfansheng
  */
-public class UploadWorker<T> implements Disposable {
-    private final UploadObserver<T> observer;
+public class UploadWorker<T> {
+    private final Call<ResponseBody> call;
+    private final UploadController<T> controller;
+    private int completeCount;
 
     public UploadWorker(UploadInfo<T> info, UploadListener<T> listener) {
-        observer = new UploadObserver<>(info, listener);
+        controller = new UploadController<>(info, listener);
         Retrofit.Builder builder = new Retrofit.Builder();
         if (info.client == null) {
             builder.client(HttpUtils.initHttpsClient(true, new OkHttpClient.Builder()).build());
         } else {
             builder.client(info.client);
         }
-        UploadService service = builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .baseUrl(info.getBaseUrl())
+        UploadService service = builder.baseUrl(info.getBaseUrl())
                 .build()
                 .create(UploadService.class);
         MultipartBody.Builder bodyBuilder = new MultipartBody.Builder();
@@ -47,31 +42,49 @@ public class UploadWorker<T> implements Disposable {
                 bodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
             }
         }
+        final InternalUploadListener uploadListener = new InternalUploadListener() {
+            @Override
+            public void onComplete(@NonNull FileInfo fileInfo) {
+                completeCount++;
+                if (completeCount >= info.fileInfos.size()) {
+                    controller.onComplete();
+                }
+            }
+
+            @Override
+            public void onProgress(@NonNull FileInfo fileInfo, long progress, long max) {
+                controller.onProgress(fileInfo, progress, max);
+            }
+        };
         for (FileInfo fileInfo : info.fileInfos) {
-            ProgressRequestBody body = new ProgressRequestBody(fileInfo.getMediaType(), fileInfo, observer);
+            ProgressRequestBody body = new ProgressRequestBody(fileInfo.getMediaType(), fileInfo, uploadListener);
             bodyBuilder.addFormDataPart(fileInfo.getFormDataName(), fileInfo.getFilename(), body);
         }
-        Observable<Response<ResponseBody>> observable;
         if (info.headers == null || info.headers.isEmpty()) {
-            observable = service.upload(info.url, bodyBuilder.build());
+            call = service.upload(info.url, bodyBuilder.build());
         } else {
-            observable = service.upload(info.url, bodyBuilder.build(), info.headers);
+            call = service.upload(info.url, bodyBuilder.build(), info.headers);
         }
-        observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
-                .subscribe(observer);
+        controller.onStart();
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                controller.onResponse(response);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable throwable) {
+                controller.onError(throwable);
+            }
+        });
     }    
 
-    @Override
-    public void dispose() {
-        observer.dispose();
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return observer.isDisposed();
+    public boolean isCanceled() {
+        return call.isCanceled();
     }
     
     public void cancel() {
-        dispose();
+        call.cancel();
+        controller.onCancel();
     }
 }

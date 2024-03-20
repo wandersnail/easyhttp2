@@ -3,13 +3,16 @@ package cn.wandersnail.http;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
+import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import cn.wandersnail.http.callback.Cancelable;
 import cn.wandersnail.http.callback.RequestCallback;
-import cn.wandersnail.http.util.SchedulerUtils;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Converter;
 import retrofit2.Response;
 
@@ -19,51 +22,80 @@ import retrofit2.Response;
  * date: 2019/8/23 21:19
  * author: zengfansheng
  */
-class GeneralRequestTask<T> {
+class GeneralRequestTask<T> implements Cancelable {
     private final Configuration configuration;
     private final RequestCallback<T> callback;
-    Disposable disposable;
+    Call<ResponseBody> call;
     private Handler handler;
 
-    GeneralRequestTask(Observable<Response<ResponseBody>> observable, Converter<ResponseBody, T> converter,
-                              Configuration configuration, RequestCallback<T> callback) {
+    GeneralRequestTask(@NonNull Call<ResponseBody> call, Converter<ResponseBody, T> converter,
+                       Configuration configuration, RequestCallback<T> callback) {
+        this.call = call;
         this.configuration = configuration;
         this.callback = callback;
-        doRequest(observable, converter, configuration, callback);
+        doRequest(call, converter, configuration, callback);
     }
     
-    private void doRequest(Observable<Response<ResponseBody>> observable, Converter<ResponseBody, T> converter, Configuration configuration, RequestCallback<T> callback) {
+    private void doRequest(Call<ResponseBody> call, Converter<ResponseBody, T> converter, Configuration configuration, RequestCallback<T> callback) {
         Runnable timerRunnable = new TimerRunnable();
         //只有设置过超时才计
         if (configuration.callTimeout > 0) {
             handler = new Handler(Looper.getMainLooper());
             handler.postDelayed(timerRunnable, 1000);
         }
-        disposable = observable.compose(SchedulerUtils.applyGeneralObservableSchedulers())
-                .subscribe(response -> {
-                    handleRequestOver(timerRunnable);
-                    if (callback != null) {
-                        T successBody = null;
-                        if (response.isSuccessful()) {
-                            ResponseBody body = response.body();
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                handleRequestOver(timerRunnable);
+                if (callback != null) {
+                    T successBody = null;
+                    T errorBody = null;
+                    if (response.isSuccessful()) {
+                        ResponseBody body = response.body();
+                        try {
                             successBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
-                            callback.onSuccess(response, successBody);
+                        } catch (IOException e) {
+                            callback.onError(e);
+                            return;
                         }
-                        callback.onResponse(response, successBody, response.errorBody());
+                    } else {
+                        ResponseBody body = response.errorBody();
+                        try {
+                            errorBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
+                        } catch (IOException ignore) {
+                        }
                     }
-                }, throwable -> {
-                    handleRequestOver(timerRunnable);
-                    if (callback != null) {
-                        callback.onError(throwable);
-                    }
-                }, () -> handleRequestOver(timerRunnable));
+                    callback.onResponse(response, successBody, errorBody);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                handleRequestOver(timerRunnable);
+                if (callback != null) {
+                    callback.onError(t);
+                }
+            }
+        });
     }
     
     //处理请求结束
     private void handleRequestOver(Runnable timerRunnable) {
-        disposable = null;
+        call = null;
         if (handler != null) {
             handler.removeCallbacks(timerRunnable);
+        }
+    }
+
+    @Override
+    public boolean isCanceled() {
+        return call == null || call.isCanceled();
+    }
+
+    @Override
+    public void cancel() {
+        if (call != null) {
+            call.cancel();
         }
     }
 
@@ -72,13 +104,13 @@ class GeneralRequestTask<T> {
 
         @Override
         public void run() {
-            if (disposable != null && ++secondCount < configuration.callTimeout) {
+            if (call != null && ++secondCount < configuration.callTimeout) {
                 handler.postDelayed(this, 1000);
             } else {
-                if (disposable != null && !disposable.isDisposed()) {
-                    disposable.dispose();
+                if (call != null && !call.isCanceled()) {
+                    call.cancel();
                 }
-                disposable = null;
+                call = null;
                 if (callback != null) {
                     callback.onError(new TimeoutException("Http request timeout!"));
                 }

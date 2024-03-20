@@ -1,6 +1,8 @@
 package cn.wandersnail.http.factory;
 
 
+import androidx.annotation.NonNull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -22,12 +24,12 @@ public class GsonConverterFactory extends Converter.Factory {
     }
 
     @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+    public Converter<ResponseBody, ?> responseBodyConverter(@NonNull Type type, @NonNull Annotation[] annotations, @NonNull Retrofit retrofit) {
         return new GsonResponseBodyConverter(type);
     }
 
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
+    public Converter<?, RequestBody> requestBodyConverter(@NonNull Type type, @NonNull Annotation[] parameterAnnotations, @NonNull Annotation[] methodAnnotations, @NonNull Retrofit retrofit) {
         return super.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
     }
 }

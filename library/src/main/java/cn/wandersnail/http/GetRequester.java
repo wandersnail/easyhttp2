@@ -2,8 +2,8 @@ package cn.wandersnail.http;
 
 import androidx.annotation.NonNull;
 
+import cn.wandersnail.http.callback.Cancelable;
 import cn.wandersnail.http.callback.RequestCallback;
-import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 
@@ -40,14 +40,14 @@ public class GetRequester<T> extends Requester<T> {
     public ConvertedResponse<T> execute() {
         handleConfiguration(url, configuration);
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
-            return execute(configuration.service.getSync(url, configuration.headers));
+            return execute(configuration.service.get(url, configuration.headers));
         } else {
-            return execute(configuration.service.getSync(url));
+            return execute(configuration.service.get(url));
         }
     }
 
     @Override
-    public Disposable enqueue(RequestCallback<T> callback) {
+    public Cancelable enqueue(RequestCallback<T> callback) {
         handleConfiguration(url, configuration);
         if (configuration.headers != null && !configuration.headers.isEmpty()) {
             return enqueue(configuration.service.get(url, configuration.headers), callback);

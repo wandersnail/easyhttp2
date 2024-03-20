@@ -23,5 +23,5 @@ public interface DownloadListener<T extends DownloadInfo> {
      *
      * @param info 当前下载信息
      */
-    void onProgress(@NonNull T info);
+    void onProgress(@NonNull T info, int progress);
 }

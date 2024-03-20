@@ -33,17 +33,17 @@ public class SyncUploadWorkerBuilder<T> {
         return this;
     }
 
-    public SyncUploadWorkerBuilder<T> setListener(UploadProgressListener listener) {
+    public SyncUploadWorkerBuilder<T> setListener(@NonNull UploadProgressListener listener) {
         this.listener = listener;
         return this;
     }
 
-    public SyncUploadWorkerBuilder<T> setFileParts(List<FileInfo> fileInfos) {
+    public SyncUploadWorkerBuilder<T> setFileParts(@NonNull List<FileInfo> fileInfos) {
         this.fileInfos = fileInfos;
         return this;
     }
 
-    public SyncUploadWorkerBuilder<T> setHeaders(Map<String, String> headers) {
+    public SyncUploadWorkerBuilder<T> setHeaders(@NonNull Map<String, String> headers) {
         this.headers = headers;
         return this;
     }
@@ -77,7 +77,7 @@ public class SyncUploadWorkerBuilder<T> {
      */
     public SyncUploadWorker<T> buildAndUpload() {
         UploadInfo<T> info;
-        if (tag == null || tag.length() == 0) {
+        if (tag == null || tag.isEmpty()) {
             info = new UploadInfo<>(url);
         } else {
             info = new UploadInfo<>(tag, url);

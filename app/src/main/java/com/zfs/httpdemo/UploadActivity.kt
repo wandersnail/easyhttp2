@@ -61,7 +61,7 @@ class UploadActivity : ViewBindingActivity<UploadActivityBinding>() {
                 val inputStream = contentResolver.openInputStream(uri1)!!
                 val filename = binding.tvPath.text.toString()
                 worker = EasyHttp.uploadWorkerBuilder(String::class.java)
-                    .setUrl("url")
+                    .setUrl("http://192.168.0.107:9991/file/upload")
                     .setClient(getClient())
                     .setConverter(StringResponseConverter())
                     .setFileParts(listOf(FileInfo.Builder()
@@ -88,7 +88,9 @@ class UploadActivity : ViewBindingActivity<UploadActivityBinding>() {
                             response: Response<ResponseBody>,
                             convertedResponse: String?
                         ) {
-                            binding.tvResponse.text = convertedResponse
+                            binding.tvResponse.text = if (convertedResponse?.isNotBlank() == true) convertedResponse else {
+                                response.errorBody()?.string()
+                            }
                         }
                     })
                     .buildAndUpload()

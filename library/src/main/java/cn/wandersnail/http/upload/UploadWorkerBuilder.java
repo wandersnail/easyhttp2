@@ -33,17 +33,17 @@ public class UploadWorkerBuilder<T> {
         return this;
     }
 
-    public UploadWorkerBuilder<T> setListener(UploadListener<T> listener) {
+    public UploadWorkerBuilder<T> setListener(@NonNull UploadListener<T> listener) {
         this.listener = listener;
         return this;
     }
 
-    public UploadWorkerBuilder<T> setFileParts(List<FileInfo> fileInfos) {
+    public UploadWorkerBuilder<T> setFileParts(@NonNull List<FileInfo> fileInfos) {
         this.fileInfos = fileInfos;
         return this;
     }
 
-    public UploadWorkerBuilder<T> setHeaders(Map<String, String> headers) {
+    public UploadWorkerBuilder<T> setHeaders(@NonNull Map<String, String> headers) {
         this.headers = headers;
         return this;
     }
@@ -77,7 +77,7 @@ public class UploadWorkerBuilder<T> {
      */
     public UploadWorker<T> buildAndUpload() {
         UploadInfo<T> info;
-        if (tag == null || tag.length() == 0) {
+        if (tag == null || tag.isEmpty()) {
             info = new UploadInfo<>(url);
         } else {
             info = new UploadInfo<>(tag, url);

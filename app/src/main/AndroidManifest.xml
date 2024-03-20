@@ -26,16 +26,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MultiDownloadActivity"
-            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
-        <activity
-            android:name=".SingleDownloadActivity"
-            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
-        <activity
-            android:name=".GeneralRequestActivity"
+            android:name=".DownloadActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
         <activity
             android:name=".UploadActivity"
+            android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
+        <activity
+            android:name=".GeneralRequestActivity"
             android:configChanges="keyboardHidden|orientation|navigation|screenSize|keyboard"/>
     </application>
 

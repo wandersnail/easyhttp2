@@ -19,9 +19,9 @@ import okio.BufferedSink;
 class ProgressRequestBody extends RequestBody {
     private final MediaType contentType;
     private final FileInfo fileInfo;
-    private final UploadProgressListener listener;
+    private final InternalUploadListener listener;
 
-    ProgressRequestBody(MediaType contentType, FileInfo fileInfo, UploadProgressListener listener) {
+    ProgressRequestBody(MediaType contentType, FileInfo fileInfo, @NonNull InternalUploadListener listener) {
         this.contentType = contentType;
         this.fileInfo = fileInfo;
         this.listener = listener;
@@ -52,10 +52,9 @@ class ProgressRequestBody extends RequestBody {
             while ((len = inputStream.read(buffer)) != -1) {
                 sink.write(buffer, 0, len);
                 uploadCount += len;
-                if (listener != null) {
-                    listener.onProgress(fileInfo, uploadCount, contentLength());
-                }
+                listener.onProgress(fileInfo, uploadCount, contentLength());
             }
+            listener.onComplete(fileInfo);
         } finally {
             HttpUtils.closeQuietly(inputStream);
         }

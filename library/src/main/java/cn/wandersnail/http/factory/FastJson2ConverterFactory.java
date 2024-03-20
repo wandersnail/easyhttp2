@@ -1,6 +1,8 @@
 package cn.wandersnail.http.factory;
 
 
+import androidx.annotation.NonNull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -15,19 +17,20 @@ import retrofit2.Retrofit;
  * author: zengfansheng
  */
 public class FastJson2ConverterFactory extends Converter.Factory {
-    private FastJson2ConverterFactory() {}
-    
+    private FastJson2ConverterFactory() {
+    }
+
     public static FastJson2ConverterFactory create() {
         return new FastJson2ConverterFactory();
     }
 
     @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+    public Converter<ResponseBody, ?> responseBodyConverter(@NonNull Type type, @NonNull Annotation[] annotations, @NonNull Retrofit retrofit) {
         return new FastJson2ResponseBodyConverter(type);
     }
 
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
+    public Converter<?, RequestBody> requestBodyConverter(@NonNull Type type, @NonNull Annotation[] parameterAnnotations, @NonNull Annotation[] methodAnnotations, @NonNull Retrofit retrofit) {
         return super.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
     }
 }

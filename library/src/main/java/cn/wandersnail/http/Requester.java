@@ -2,17 +2,15 @@ package cn.wandersnail.http;
 
 import java.util.concurrent.TimeUnit;
 
+import cn.wandersnail.http.callback.Cancelable;
 import cn.wandersnail.http.callback.RequestCallback;
 import cn.wandersnail.http.util.HttpUtils;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Converter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
  * date: 2021/4/8 15:42
@@ -31,7 +29,7 @@ abstract class Requester<T> {
     /**
      * 异步请求
      */
-    public abstract Disposable enqueue(RequestCallback<T> callback);
+    public abstract Cancelable enqueue(RequestCallback<T> callback);
     
     protected void handleConfiguration(String url, Configuration configuration) {
         String baseUrl = HttpUtils.getBaseUrl(url);
@@ -53,7 +51,6 @@ abstract class Requester<T> {
             }
             config.retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .client(client)
                     .build();
         }
@@ -65,7 +62,7 @@ abstract class Requester<T> {
         return new SyncGeneralRequestTask<>(call, converter, configuration).convertedResp;
     }
 
-    protected Disposable enqueue(Observable<Response<ResponseBody>> observable, RequestCallback<T> callback) {
-        return new GeneralRequestTask<>(observable, converter, configuration, callback).disposable;
+    protected Cancelable enqueue(Call<ResponseBody> call, RequestCallback<T> callback) {
+        return new GeneralRequestTask<>(call, converter, configuration, callback);
     }
 }

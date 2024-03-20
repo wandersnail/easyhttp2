@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,8 +11,6 @@ import cn.wandersnail.http.download.DownloadWorkerBuilder;
 import cn.wandersnail.http.download.MultiDownloadWorkerBuilder;
 import cn.wandersnail.http.upload.SyncUploadWorkerBuilder;
 import cn.wandersnail.http.upload.UploadWorkerBuilder;
-import io.reactivex.exceptions.UndeliverableException;
-import io.reactivex.plugins.RxJavaPlugins;
 
 /**
  * http网络请求，包含普通的get和post、上传、下载
@@ -26,38 +23,16 @@ public class EasyHttp {
     private Gson gson;
     private final GlobalConfiguration globalConfiguration = new GlobalConfiguration();
 
-    static {
-        RxJavaPlugins.setErrorHandler(t -> {
-            if (t instanceof UndeliverableException) {
-                t = t.getCause() == null ? new Throwable(t) : t.getCause();
-            }
-            if (t instanceof IOException) {
-                // fine, irrelevant network problem or API that throws on cancellation
-                return;
-            }
-            if (t instanceof InterruptedException) {
-                // fine, some blocking code was interrupted by a dispose call
-                return;
-            }
-            Thread.UncaughtExceptionHandler exceptionHandler = Thread.currentThread().getUncaughtExceptionHandler();
-            if (exceptionHandler != null && (t instanceof NullPointerException || t instanceof IllegalArgumentException)) {
-                // that's likely a bug in the application
-                exceptionHandler.uncaughtException(Thread.currentThread(), t);
-                return;
-            }
-            if (exceptionHandler != null && t instanceof IllegalStateException) {
-                // that's a bug in RxJava or in a custom operator
-                exceptionHandler.uncaughtException(Thread.currentThread(), t);
-            }
-        });
-    }
-
     private static final class InstanceHolder {
         static final EasyHttp instance = new EasyHttp();
     }
 
     public static EasyHttp getInstance() {
         return InstanceHolder.instance;
+    }
+
+    public static void executeOnIo(@NonNull Runnable runnable) {
+        executorService.execute(runnable);
     }
 
     @NonNull

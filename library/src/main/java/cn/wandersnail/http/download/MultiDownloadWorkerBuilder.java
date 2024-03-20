@@ -50,7 +50,7 @@ public class MultiDownloadWorkerBuilder {
     /**
      * 设置下载进度监听器
      */
-    public MultiDownloadWorkerBuilder setListener(MultiDownloadListener<DownloadInfo> listener) {
+    public MultiDownloadWorkerBuilder setListener(@NonNull MultiDownloadListener<DownloadInfo> listener) {
         this.listener = listener;
         return this;
     }
