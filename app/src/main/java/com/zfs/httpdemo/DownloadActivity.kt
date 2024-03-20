@@ -31,9 +31,8 @@ class DownloadActivity : ViewBindingActivity<DownloadActivityBinding>() {
                         binding.tvState.text = getStateString(info.state, t)
                     }
 
-                    override fun onProgress(info: DownloadInfo) {
-                        binding.progressBar.progress =
-                            (info.completionLength * 100 / info.contentLength).toInt()
+                    override fun onProgress(info: DownloadInfo, progress: Int) {
+                        binding.progressBar.progress = progress
                     }
                 })
                 .buildAndDownload()
