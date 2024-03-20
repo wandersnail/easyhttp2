@@ -37,8 +37,8 @@
 # EastHttp使用说明
 
 ## 代码托管
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp)
-[![Release](https://jitpack.io/v/wandersnail/easyhttp.svg)](https://jitpack.io/#wandersnail/easyhttp)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp2/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cn.wandersnail/easyhttp2)
+[![Release](https://jitpack.io/v/wandersnail/easyhttp2.svg)](https://jitpack.io/#wandersnail/easyhttp2)
 
 ## 使用
 1. 因为使用了jdk8的一些特性，需要在module的build.gradle里添加如下配置：
