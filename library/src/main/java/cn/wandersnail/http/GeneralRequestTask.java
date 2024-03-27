@@ -5,7 +5,6 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
-import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import cn.wandersnail.http.callback.Cancelable;
@@ -54,7 +53,7 @@ class GeneralRequestTask<T> implements Cancelable {
                         ResponseBody body = response.body();
                         try {
                             successBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             callback.onError(e);
                             return;
                         }
@@ -62,7 +61,7 @@ class GeneralRequestTask<T> implements Cancelable {
                         ResponseBody body = response.errorBody();
                         try {
                             errorBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
-                        } catch (IOException ignore) {
+                        } catch (Exception ignore) {
                         }
                     }
                     callback.onResponse(response, successBody, errorBody);
