@@ -22,4 +22,5 @@ public class Configuration extends BaseConfiguration {
     public Retrofit retrofit;
     public OkHttpClient client;
     HttpService service;
+    public boolean convertErrorBody;
 }

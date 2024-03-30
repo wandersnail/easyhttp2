@@ -24,7 +24,7 @@ public interface RequestCallback<T> {
      *
      * @param response    原始响应
      * @param successBody 请求成功时，经过设置的转换器转换后的结果
-     * @param errorBody   错误响应的body
+     * @param errorBody   错误响应的body，只有在配置中配置了需要转换才会转，否则为空
      */
     void onResponse(@NonNull retrofit2.Response<ResponseBody> response, @Nullable T successBody, @Nullable T errorBody);
 }

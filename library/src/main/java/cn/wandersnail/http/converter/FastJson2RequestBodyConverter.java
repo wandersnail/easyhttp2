@@ -1,5 +1,7 @@
 package cn.wandersnail.http.converter;
 
+import androidx.annotation.NonNull;
+
 import com.alibaba.fastjson2.JSON;
 
 import java.io.IOException;
@@ -17,7 +19,7 @@ import retrofit2.Converter;
 public class FastJson2RequestBodyConverter implements Converter<Object, RequestBody> {
 
     @Override
-    public RequestBody convert(Object value) throws IOException {
+    public RequestBody convert(@NonNull Object value) throws IOException {
         MediaType mediaType = MediaType.parse("application/json; charset=UTF-8");
         return RequestBody.create(mediaType, JSON.toJSONBytes(value));
     }

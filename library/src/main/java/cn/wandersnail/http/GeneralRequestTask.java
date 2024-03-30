@@ -57,7 +57,7 @@ class GeneralRequestTask<T> implements Cancelable {
                             callback.onError(e);
                             return;
                         }
-                    } else {
+                    } else if (configuration.convertErrorBody) {
                         ResponseBody body = response.errorBody();
                         try {
                             errorBody = body == null ? null : (converter == null ? (T) body : converter.convert(body));
