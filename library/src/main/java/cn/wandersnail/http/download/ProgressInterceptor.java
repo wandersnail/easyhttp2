@@ -11,7 +11,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- * 拦截器，加入进度监听
+ * 拦截器，加入已读数据量监听
  * <p>
  * date: 2019/8/23 16:31
  * author: zengfansheng

@@ -1,13 +1,16 @@
 package com.zfs.httpdemo
 
 import android.os.Bundle
+import android.util.Log
 import cn.wandersnail.http.EasyHttp
 import cn.wandersnail.http.TaskInfo
 import cn.wandersnail.http.download.DownloadInfo
 import cn.wandersnail.http.download.DownloadListener
 import cn.wandersnail.http.download.DownloadWorker
+import cn.wandersnail.http.download.RangeDownloadWorker
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.zfs.httpdemo.databinding.DownloadActivityBinding
-import java.io.File
 
 /**
  * Created by 曾繁盛 on 2024/3/20 17:25
@@ -39,6 +42,29 @@ class DownloadActivity : ViewBindingActivity<DownloadActivityBinding>() {
         }
         binding.btnCancel.setOnClickListener {
             worker?.cancel()
+        }
+        val gson: Gson = GsonBuilder()
+            .disableHtmlEscaping()
+            .create()
+        var blockWorker: RangeDownloadWorker<DownloadInfo>? = null
+        binding.btnStartBlock.setOnClickListener {
+            blockWorker = EasyHttp.rangeDownloadWorkerBuilder()
+                .setFileInfo(url, savePath)
+                .setListener(object : DownloadListener<DownloadInfo> {
+                    override fun onStateChange(info: DownloadInfo, t: Throwable?) {
+                        binding.tvStateBlock.text = getStateString(info.state, t)
+                    }
+
+                    override fun onProgress(info: DownloadInfo, progress: Int) {
+                        binding.progressBarBlock.progress = progress
+                        Log.d("DownloadActivity", "readBytes = ${info.completionLength}，contentLength = ${info.contentLength}")
+                    }
+                })
+                .setRangeHeaderName("Snail-Range")
+                .download()
+        }
+        binding.btnCancelBlock.setOnClickListener {
+            blockWorker?.cancel()
         }
     }
 

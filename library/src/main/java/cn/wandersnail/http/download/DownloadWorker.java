@@ -115,6 +115,9 @@ public class DownloadWorker<T extends DownloadInfo> {
             controller.onError(e);
         } finally {
             HttpUtils.closeQuietly(channel, accessFile, input);
+            if (controller.isCancel()) {
+                file.delete();
+            }
         }
     }
         

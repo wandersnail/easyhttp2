@@ -16,5 +16,5 @@ import retrofit2.http.Url;
 public interface DownloadService {
     @Streaming
     @GET
-    Call<ResponseBody> download(@Header("RANGE") String offset, @Url String url);
+    Call<ResponseBody> download(@Header("Range") String offset, @Url String url);
 }

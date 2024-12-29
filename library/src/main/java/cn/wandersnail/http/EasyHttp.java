@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import cn.wandersnail.http.download.DownloadWorkerBuilder;
 import cn.wandersnail.http.download.MultiDownloadWorkerBuilder;
+import cn.wandersnail.http.download.RangeDownloadWorkerBuilder;
 import cn.wandersnail.http.upload.SyncUploadWorkerBuilder;
 import cn.wandersnail.http.upload.UploadWorkerBuilder;
 
@@ -57,6 +58,13 @@ public class EasyHttp {
      */
     public static DownloadWorkerBuilder singleDownloadWorkerBuilder() {
         return new DownloadWorkerBuilder();
+    }
+
+    /**
+     * 分段下载
+     */
+    public static RangeDownloadWorkerBuilder rangeDownloadWorkerBuilder() {
+        return new RangeDownloadWorkerBuilder();
     }
 
     /**

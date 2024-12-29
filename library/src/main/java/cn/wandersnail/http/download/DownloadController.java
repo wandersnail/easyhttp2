@@ -7,15 +7,14 @@ import androidx.annotation.NonNull;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import cn.wandersnail.http.EasyHttp;
 import cn.wandersnail.http.TaskInfo;
 import cn.wandersnail.http.callback.ProgressListener;
+import cn.wandersnail.http.util.HttpUtils;
 
 /**
  * date: 2019/8/23 15:49
@@ -85,7 +84,7 @@ class DownloadController<T extends DownloadInfo> implements ProgressListener {
                 destFile.delete();//如果目标有文件，删除
             }
             File tempFile = info.getTemporaryFile();
-            copyFile(tempFile, destFile);            
+            FileUtil.copyFile(tempFile, destFile);
             boolean success = destFile.exists() && tempFile.length() == destFile.length();
             if (!success) {
                 destFile.delete();
@@ -110,38 +109,6 @@ class DownloadController<T extends DownloadInfo> implements ProgressListener {
         });
     }
 
-    private void copyFile(@NonNull File src, @NonNull File target) {
-        BufferedInputStream fis = null;
-        BufferedOutputStream fos = null;
-        try {
-            fis = new BufferedInputStream(new FileInputStream(src));
-            fos = new BufferedOutputStream(new FileOutputStream(target));
-            byte[] buffer = new byte[40960];
-            int len;
-            while ((len = fis.read(buffer)) != -1) {
-                fos.write(buffer, 0, len);
-            }
-            fos.flush();
-        } catch (Exception e) {
-            target.delete();
-        } finally {
-            closeQuietly(fis, fos);
-        }
-    }
-    
-    private void closeQuietly(Closeable... closeables) {
-        try {
-            if (closeables != null) {
-                for (Closeable closeable : closeables) {
-                    if (closeable != null) {
-                        closeable.close();
-                    }
-                }
-            }
-        } catch (IOException ignore) {
-        }
-    }
-    
     private void updateProgress() {
         if (info.completionLength > 0 && info.contentLength > 0 && listener != null) {
             listener.onProgress(info, (int) (info.completionLength * 100 / info.contentLength));
